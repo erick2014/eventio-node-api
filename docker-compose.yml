@@ -1,0 +1,14 @@
+version: "3"
+services:
+  mariadb:
+    image: mariadb:latest
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_USER=eventio
+      - MYSQL_PASSWORD=eventio_pass
+      - MYSQL_DATABASE=eventiodb
+      - MYSQL_ROOT_PASSWORD=myrootpassword
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ./config/db/init.sql:/docker-entrypoint-initdb.d/init.sql

@@ -1,0 +1,2 @@
+GRANT ALL PRIVILEGES ON *.* TO 'eventio'@'%' IDENTIFIED BY 'eventio_pass';
+FLUSH PRIVILEGES;

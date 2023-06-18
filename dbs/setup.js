@@ -15,7 +15,7 @@ const getInstance = ()=>{
       throw new Error(`Please setup a valid ENVIRONMENT`)
     }
 
-    if(!ENVIRONMENT || !(ENVIRONMENT in config)){
+    if(!(ENVIRONMENT in config)){
       throw new Error(`Environment ${ENVIRONMENT} is not supported`)
     }
     console.log('initializing a new connection instance')

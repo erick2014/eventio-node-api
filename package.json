@@ -1,5 +1,5 @@
 {
-  "name": "-tasks-backend",
+  "name": "eventio-nodejs-api",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",

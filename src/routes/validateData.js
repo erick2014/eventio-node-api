@@ -12,7 +12,7 @@ const loginUserSchema = Joi.object({
   password: Joi.string().required().label("Password"),
 });
 
-function validate(joiSchema, method = "body") {
+function validateData(joiSchema, method = "body") {
   return function (req, res, next) {
     let requestData = null;
 
@@ -24,7 +24,9 @@ function validate(joiSchema, method = "body") {
       requestData = req.params;
     }
 
-    const { error } = joiSchema.validate(requestData, { abortEarly: false });
+    const { error } = joiSchema.validateData(requestData, {
+      abortEarly: false,
+    });
 
     if (error) {
       const errorMessage = error.details
@@ -39,4 +41,4 @@ function validate(joiSchema, method = "body") {
   };
 }
 
-export { validate, createUserSchema, loginUserSchema };
+export { validateData, createUserSchema, loginUserSchema };

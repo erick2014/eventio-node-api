@@ -2,10 +2,10 @@ import { Router } from "express";
 import UsersController from "../controllers/usersController.js";
 import AuthController from "../controllers/authController.js";
 import {
-  validate,
+  validateData,
   createUserSchema,
   loginUserSchema,
-} from "./validateDataUser.js";
+} from "./validateData.js";
 
 const userRouter = Router();
 const userController = new UsersController();
@@ -13,7 +13,7 @@ const authController = new AuthController();
 
 userRouter.post(
   "/signup",
-  validate(createUserSchema),
+  validateData(createUserSchema),
   async (req, res, next) => {
     const { firstName, lastName, email, password } = req.body;
 
@@ -33,16 +33,20 @@ userRouter.post(
   }
 );
 
-userRouter.post("/login", validate(loginUserSchema), async (req, res, next) => {
-  const { email, password } = req.body;
+userRouter.post(
+  "/login",
+  validateData(loginUserSchema),
+  async (req, res, next) => {
+    const { email, password } = req.body;
 
-  try {
-    const userFound = await authController.loginUser({ email, password });
+    try {
+      const userFound = await authController.loginUser({ email, password });
 
-    res.json(userFound);
-  } catch (error) {
-    next(error);
+      res.json(userFound);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 export default userRouter;

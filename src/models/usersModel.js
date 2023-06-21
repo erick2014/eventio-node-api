@@ -1,5 +1,5 @@
-import { DataTypes } from "sequelize";
-import { getInstance } from "../../dbs/setup.js";
+const { DataTypes } = require("sequelize");
+const { getInstance } = require("../../dbs/setup.js");
 const sequelize = getInstance();
 
 const schemaUsers = {
@@ -34,4 +34,4 @@ const Users = sequelize.define("users", schemaUsers, {
   freezeTableName: true,
 });
 
-export { Users, schemaUsers };
+module.exports = { Users, schemaUsers };

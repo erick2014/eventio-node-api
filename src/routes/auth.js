@@ -1,10 +1,10 @@
-import { Router } from "express";
-import UsersController from "../controllers/usersController.js";
-import {
+const { Router } = require("express");
+const UsersController = require("../controllers/usersController.js");
+const {
   validateRequest,
   createUserSchema,
   loginUserSchema,
-} from "./validateData.js";
+} = require("./validateData.js");
 
 const userRouter = Router();
 const userController = new UsersController();
@@ -47,4 +47,4 @@ userRouter.post(
   }
 );
 
-export default userRouter;
+module.exports = userRouter;

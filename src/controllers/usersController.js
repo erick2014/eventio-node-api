@@ -1,4 +1,4 @@
-import { Users } from "../models/usersModel.js";
+const { Users } = require("../models/usersModel.js");
 
 class UsersController {
   createUser({ firstName, lastName, email, password }) {
@@ -21,4 +21,4 @@ class UsersController {
   }
 }
 
-export default UsersController;
+module.exports = UsersController;

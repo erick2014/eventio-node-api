@@ -1,17 +1,6 @@
 import { Users } from "../models/usersModel.js";
 
-class UsersController {
-  createUser({ name, lastName, email, password }) {
-    const user = Users.create({
-      name,
-      lastName,
-      email,
-      password,
-    });
-
-    return user;
-  }
-
+class AuthController {
   loginUser({ email, password }) {
     const userLogin = Users.findOne({
       where: { email: email, password: password },
@@ -21,4 +10,4 @@ class UsersController {
   }
 }
 
-export default UsersController;
+export default AuthController;

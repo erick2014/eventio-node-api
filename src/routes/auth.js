@@ -1,35 +1,45 @@
 import { Router } from "express";
-import UsersController from "../controllers/authController.js";
-import { validateDataUser } from "./validateDataUser.js";
+import UsersController from "../controllers/usersController.js";
+import AuthController from "../controllers/authController.js";
+import {
+  validate,
+  createUserSchema,
+  loginUserSchema,
+} from "./validateDataUser.js";
 
 const userRouter = Router();
 const userController = new UsersController();
+const authController = new AuthController();
 
-userRouter.post("/signup", validateDataUser, async (req, res, next) => {
-  const { name, lastName, email, password } = req.body;
+userRouter.post(
+  "/signup",
+  validate(createUserSchema),
+  async (req, res, next) => {
+    const { firstName, lastName, email, password } = req.body;
 
-  try {
-    const newUser = await userController.createUser({
-      name,
-      lastName,
-      email,
-      password,
-    });
+    try {
+      const newUser = await userController.createUser({
+        firstName,
+        lastName,
+        email,
+        password,
+      });
 
-    res.status(201).json(newUser);
-  } catch (error) {
-    console.log(error);
-    next(error);
+      res.json(newUser);
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
   }
-});
+);
 
-userRouter.post("/login", validateDataUser, async (req, res, next) => {
+userRouter.post("/login", validate(loginUserSchema), async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
-    const userFound = await userController.loginUser({ email, password });
+    const userFound = await authController.loginUser({ email, password });
 
-    res.status(201).json(userFound);
+    res.json(userFound);
   } catch (error) {
     next(error);
   }

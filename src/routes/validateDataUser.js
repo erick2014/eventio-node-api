@@ -1,7 +1,7 @@
 import Joi from "joi";
 
 const createUserSchema = Joi.object({
-  name: Joi.string().required().label("Name"),
+  firstName: Joi.string().required().label("Name"),
   lastName: Joi.string().required().label("LastName"),
   email: Joi.string().required().label("Email"),
   password: Joi.string().required().label("Password"),
@@ -12,28 +12,31 @@ const loginUserSchema = Joi.object({
   password: Joi.string().required().label("Password"),
 });
 
-const validateDataUser = (req, res, next) => {
-  const url = req.originalUrl;
-  let schemaToUse;
+function validate(joiSchema, method = "body") {
+  return function (req, res, next) {
+    let requestData = null;
 
-  if (url === "/auth/signup") {
-    schemaToUse = createUserSchema;
-  } else if (url === "/auth/login") {
-    schemaToUse = loginUserSchema;
-  }
+    if (method === "body") {
+      requestData = req.body;
+    } else if (method === "query") {
+      requestData = req.query;
+    } else if (method === "params") {
+      requestData = req.params;
+    }
 
-  const { error } = schemaToUse.validate(req.body, { abortEarly: false });
+    const { error } = joiSchema.validate(requestData, { abortEarly: false });
 
-  if (!error) {
+    if (error) {
+      const errorMessage = error.details
+        .map((detail) => detail.message)
+        .join(", ");
+      res.status(400).json({
+        error: errorMessage,
+      });
+      return;
+    }
     next();
-  } else {
-    const errorMessage = error.details
-      .map((detail) => detail.message)
-      .join(", ");
-    res.status(400).json({
-      error: errorMessage,
-    });
-  }
-};
+  };
+}
 
-export { validateDataUser };
+export { validate, createUserSchema, loginUserSchema };

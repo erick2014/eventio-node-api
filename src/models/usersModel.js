@@ -2,14 +2,14 @@ import { DataTypes } from "sequelize";
 import { getInstance } from "../../dbs/setup.js";
 const sequelize = getInstance();
 
-const schema = {
+const schemaUsers = {
   id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     primaryKey: true,
     autoIncrement: true,
   },
-  name: {
+  firstName: {
     type: DataTypes.STRING,
     allowNull: false,
   },
@@ -27,11 +27,11 @@ const schema = {
   },
 };
 
-const Users = sequelize.define("users", schema, {
+const Users = sequelize.define("users", schemaUsers, {
   tableName: "users",
   createdAt: false,
   updatedAt: false,
   freezeTableName: true,
 });
 
-export { Users, schema };
+export { Users, schemaUsers };

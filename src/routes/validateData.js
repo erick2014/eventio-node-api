@@ -1,4 +1,4 @@
-import Joi from "joi";
+const Joi = require("joi");
 
 const createUserSchema = Joi.object({
   firstName: Joi.string().required().label("Name"),
@@ -41,4 +41,4 @@ function validateRequest(joiSchema, method = "body") {
   };
 }
 
-export { validateRequest, createUserSchema, loginUserSchema };
+module.exports = { validateRequest, createUserSchema, loginUserSchema };

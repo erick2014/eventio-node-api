@@ -1,5 +1,5 @@
-import { Sequelize } from "sequelize";
-import config from "./config/index.js";
+const { Sequelize } = require("sequelize");
+const config = require("./config/index.js");
 let sequelize = null;
 
 const getInstance = () => {
@@ -27,4 +27,4 @@ const getInstance = () => {
   }
 };
 
-export { getInstance };
+module.exports = { getInstance };

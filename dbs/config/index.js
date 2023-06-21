@@ -1,8 +1,8 @@
-import "../../dotenv.js";
+require("../../dotenv.js");
 
 const { DB_USER, DB_PASS, DB_NAME, SERVER_HOST, DIALECT } = process.env;
 
-export default {
+module.exports = {
   development: {
     username: DB_USER,
     password: DB_PASS,

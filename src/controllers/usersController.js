@@ -11,6 +11,14 @@ class UsersController {
 
     return user;
   }
+
+  loginUser({ email, password }) {
+    const userLogin = Users.findOne({
+      where: { email: email, password: password },
+    });
+
+    return userLogin;
+  }
 }
 
 export default UsersController;

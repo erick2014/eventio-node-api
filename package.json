@@ -9,7 +9,7 @@
     "migration": "npx sequelize-cli db:migrate",
     "create-migration": "npx sequelize-cli migration:generate --name ",
     "undo-migration": "npx sequelize-cli db:migrate:undo",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha ./tests/**/*.spec.js"
   },
   "keywords": [],
   "author": "",
@@ -23,6 +23,10 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.22",
-    "sequelize-cli": "^6.6.0"
+    "sequelize-cli": "^6.6.0",
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0",
+    "sinon": "^15.1.2",
+    "supertest": "^6.3.3"
   }
 }

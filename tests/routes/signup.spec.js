@@ -7,9 +7,9 @@ const {
   mockedCreateUser,
   mockedErrorCreateUser,
   mockedErrorPropertyEmpty,
-} = require("../mocks/users.mock.js");
+} = require("../mocks/signup.mock.js");
 
-describe("User routes", () => {
+describe("signup tests", () => {
   afterEach(() => {
     sinon.restore();
   });
@@ -144,5 +144,4 @@ describe("User routes", () => {
     expect(response.status).to.equal(400);
     expect(response.body).to.deep.equal(mockedErrorPropertyEmpty("Password"));
   });
-  // Agrega más casos de prueba para otros endpoints
 });

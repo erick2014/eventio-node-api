@@ -22,10 +22,3 @@ module.exports = {
   mockedErrorCreateUser,
   mockedErrorPropertyEmpty,
 };
-
-/* const mockedFindUser = [
-  {
-    email: "gyesenia@gmail.com",
-    password: "dilanteamo",
-  },
-]; */

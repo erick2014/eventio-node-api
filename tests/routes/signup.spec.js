@@ -6,7 +6,7 @@ const UsersController = require("../../src/controllers/usersController.js");
 const {
   mockedCreateUser,
   mockedErrorCreateUser,
-  mockedErrorPropertyEmpty,
+  mockedErrorParamsEmpty,
 } = require("../mocks/signup.mock.js");
 
 describe("signup tests", () => {
@@ -60,7 +60,7 @@ describe("signup tests", () => {
     );
 
     mockUsersController.callsFake(() => {
-      return Promise.resolve(mockedErrorPropertyEmpty("FirstName"));
+      return Promise.resolve(mockedErrorParamsEmpty("FirstName"));
     });
 
     const newUserParams = {
@@ -73,7 +73,7 @@ describe("signup tests", () => {
       .post("/auth/signup")
       .send(newUserParams);
     expect(response.status).to.equal(400);
-    expect(response.body).to.deep.equal(mockedErrorPropertyEmpty("FirstName"));
+    expect(response.body).to.deep.equal(mockedErrorParamsEmpty("FirstName"));
   });
 
   it("Should return an error if body.lastName is empty ", async () => {
@@ -83,7 +83,7 @@ describe("signup tests", () => {
     );
 
     mockUsersController.callsFake(() => {
-      return Promise.resolve(mockedErrorPropertyEmpty("LastName"));
+      return Promise.resolve(mockedErrorParamsEmpty("LastName"));
     });
 
     const newUserParams = {
@@ -96,7 +96,7 @@ describe("signup tests", () => {
       .post("/auth/signup")
       .send(newUserParams);
     expect(response.status).to.equal(400);
-    expect(response.body).to.deep.equal(mockedErrorPropertyEmpty("LastName"));
+    expect(response.body).to.deep.equal(mockedErrorParamsEmpty("LastName"));
   });
 
   it("Should return an error if body.email is empty ", async () => {
@@ -106,7 +106,7 @@ describe("signup tests", () => {
     );
 
     mockUsersController.callsFake(() => {
-      return Promise.resolve(mockedErrorPropertyEmpty("Email"));
+      return Promise.resolve(mockedErrorParamsEmpty("Email"));
     });
 
     const newUserParams = {
@@ -119,7 +119,7 @@ describe("signup tests", () => {
       .post("/auth/signup")
       .send(newUserParams);
     expect(response.status).to.equal(400);
-    expect(response.body).to.deep.equal(mockedErrorPropertyEmpty("Email"));
+    expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Email"));
   });
 
   it("Should return an error if body.password is empty ", async () => {
@@ -129,7 +129,7 @@ describe("signup tests", () => {
     );
 
     mockUsersController.callsFake(() => {
-      return Promise.resolve(mockedErrorPropertyEmpty("Password"));
+      return Promise.resolve(mockedErrorParamsEmpty("Password"));
     });
 
     const newUserParams = {
@@ -142,6 +142,6 @@ describe("signup tests", () => {
       .post("/auth/signup")
       .send(newUserParams);
     expect(response.status).to.equal(400);
-    expect(response.body).to.deep.equal(mockedErrorPropertyEmpty("Password"));
+    expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Password"));
   });
 });

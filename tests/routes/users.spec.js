@@ -3,10 +3,13 @@ const request = require("supertest");
 const sinon = require("sinon");
 const expect = require("chai").expect;
 const UsersController = require("../../src/controllers/usersController.js");
-const mockedCreateUser = require("../mocks/users.mock.js");
+const {
+  mockedCreateUser,
+  mockedErrorCreateUser,
+} = require("../mocks/users.mock.js");
 
 describe("User routes", () => {
-  after(() => {
+  afterEach(() => {
     sinon.restore();
   });
 
@@ -34,45 +37,20 @@ describe("User routes", () => {
     expect(response.body).to.deep.equal(mockedCreateUser);
   });
 
-  // Agrega más casos de prueba para otros endpoints
-});
-
-/*  
-it("POST /signup", async () => {
+  it("POST /signup validate parameters ", async () => {
     const mockUsersController = sinon.stub(
       UsersController.prototype,
       "createUser"
     );
 
     mockUsersController.callsFake(() => {
-      return Promise.resolve(mockedCreateUser);
+      return Promise.resolve(mockedErrorCreateUser);
     });
 
-    const response = await request(app).post("/signup");
-    console.log("response.body", response.body);
-    expect(response.status).to.equal(200);
-    expect(response.body).to.deep.equal(mockedCreateUser);
-  }); */
+    const response = await request(app).post("/auth/signup").send();
+    expect(response.status).to.equal(400);
+    expect(response.body).to.deep.equal(mockedErrorCreateUser);
+  });
 
-/* 
-  const usersController = new UsersController();
-
-  it("POST /signup prueba dos", async () => {
-    const mockUsersController = sinon.spy(usersController, "createUser");
-
-    const response = await request(app)
-      .post("/signup")
-      .send(mockedCreateUser)
-      .expect(200);
-
-    console.log(response.body);
-
-    expect(response.body.firstName).to.equal(mockedCreateUser.firstName);
-    expect(response.body.lastName).to.equal(usermockedCreateUserData.lastName);
-    expect(response.body.email).to.equal(mockedCreateUser.email);
-
-    expect(mockUsersController.calledOnce).to.be.true;
-    expect(mockUsersController.firstCall.args[0]).to.deep.equal(
-      mockedCreateUser
-    );
-  }); */
+  // Agrega más casos de prueba para otros endpoints
+});

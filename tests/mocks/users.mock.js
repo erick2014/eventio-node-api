@@ -6,7 +6,12 @@ const mockedCreateUser = {
   password: "dilan1",
 };
 
-module.exports = mockedCreateUser;
+const mockedErrorCreateUser = {
+  error:
+    '"FirstName" is required, "LastName" is required, "Email" is required, "Password" is required',
+};
+
+module.exports = { mockedCreateUser, mockedErrorCreateUser };
 
 /* const mockedFindUser = [
   {

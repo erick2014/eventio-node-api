@@ -11,7 +11,17 @@ const mockedErrorCreateUser = {
     '"FirstName" is required, "LastName" is required, "Email" is required, "Password" is required',
 };
 
-module.exports = { mockedCreateUser, mockedErrorCreateUser };
+const mockedErrorPropertyEmpty = (property) => {
+  return {
+    error: `"${property}" is required`,
+  };
+};
+
+module.exports = {
+  mockedCreateUser,
+  mockedErrorCreateUser,
+  mockedErrorPropertyEmpty,
+};
 
 /* const mockedFindUser = [
   {

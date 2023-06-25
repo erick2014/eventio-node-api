@@ -29,12 +29,20 @@ const schemaEvents = {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
 };
 
 const Events = sequelize.define("events", schemaEvents, {
   tableName: "events",
-  createdAt: Date,
-  updatedAt: Date,
   freezeTableName: true,
 });
 

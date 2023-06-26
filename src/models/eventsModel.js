@@ -25,7 +25,7 @@ const schemaEvents = {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  capacity_people_event: {
+  capacity: {
     type: DataTypes.STRING,
     allowNull: false,
   },

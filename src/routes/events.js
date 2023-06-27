@@ -18,7 +18,7 @@ eventRouter.post("/", validateRequest(eventSchema), async (req, res, next) => {
   const { title, description, event_date, event_time, capacity } = req.body;
 
   try {
-    const newEvent = await eventsController.createEvent({
+    const newEvent = await eventsController.create({
       title,
       description,
       event_date,
@@ -40,7 +40,7 @@ eventRouter.put(
     const eventId = parseInt(req.params.id);
 
     try {
-      const eventUpdated = await eventsController.updateEvent(
+      const eventUpdated = await eventsController.update(
         { title, description, event_date, event_time, capacity },
         eventId
       );
@@ -60,7 +60,7 @@ eventRouter.delete("/:id", async (req, res, next) => {
   const eventId = parseInt(req.params.id);
 
   try {
-    const eventDeleted = await eventsController.deleteEvent(eventId);
+    await eventsController.delete(eventId);
     res.sendStatus(204);
   } catch (error) {
     next(error);

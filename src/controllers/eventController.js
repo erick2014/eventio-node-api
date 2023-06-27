@@ -7,7 +7,7 @@ class EventsController {
     return allEvents;
   }
 
-  createEvent({ title, description, event_date, event_time, capacity }) {
+  create({ title, description, event_date, event_time, capacity }) {
     const event = Events.create({
       title,
       description,
@@ -19,7 +19,7 @@ class EventsController {
     return event;
   }
 
-  async updateEvent(
+  async update(
     { title, description, event_date, event_time, capacity },
     eventId
   ) {
@@ -38,7 +38,7 @@ class EventsController {
     return eventUpdate;
   }
 
-  deleteEvent(eventId) {
+  delete(eventId) {
     const eventToDelete = Events.findOne({ where: { id: eventId } });
     Events.destroy({ where: { id: eventId } });
 

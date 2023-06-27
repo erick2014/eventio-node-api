@@ -23,6 +23,15 @@ class EventsController {
     { title, description, event_date, event_time, capacity },
     eventId
   ) {
+    const dataToUpdate = {
+      id: eventId,
+      title,
+      description,
+      event_date,
+      event_time,
+      capacity,
+    };
+
     await Events.update(
       {
         title: title || Events.title,
@@ -31,11 +40,10 @@ class EventsController {
         event_time: event_time || Events.event_time,
         capacity: capacity || Events.capacity,
       },
-      { where: { id: eventId } }
+      { where: { id: eventId }, returning: true }
     );
-    const eventUpdate = await Events.findOne({ where: { id: eventId } });
 
-    return eventUpdate;
+    return dataToUpdate;
   }
 
   delete(eventId) {

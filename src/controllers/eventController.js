@@ -24,7 +24,6 @@ class EventsController {
     eventId
   ) {
     const dataToUpdate = {
-      id: eventId,
       title,
       description,
       event_date,
@@ -32,18 +31,12 @@ class EventsController {
       capacity,
     };
 
-    await Events.update(
-      {
-        title: title || Events.title,
-        description: description || Events.description,
-        event_date: event_date || Events.event_date,
-        event_time: event_time || Events.event_time,
-        capacity: capacity || Events.capacity,
-      },
-      { where: { id: eventId }, returning: true }
-    );
+    await Events.update(dataToUpdate, {
+      where: { id: eventId },
+      returning: true,
+    });
 
-    return dataToUpdate;
+    return { id: eventId, ...dataToUpdate };
   }
 
   delete(eventId) {

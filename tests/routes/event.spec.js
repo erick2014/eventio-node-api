@@ -4,6 +4,7 @@ const sinon = require("sinon");
 const expect = require("chai").expect;
 const EventsController = require("../../src/controllers/eventController.js");
 const {
+  mockedGetAllEvents,
   mockedCreateEvent,
   mockedErrorParamsEmptyCreateEvent,
   mockedErrorParamsEmpty,
@@ -12,6 +13,21 @@ const {
 describe("Event test", () => {
   afterEach(() => {
     sinon.restore();
+  });
+
+  it("Should return 200 and all events in the database", async () => {
+    const mockEventsController = sinon.stub(
+      EventsController.prototype,
+      "getAllEvents"
+    );
+
+    mockEventsController.callsFake(() => {
+      return Promise.resolve(mockedGetAllEvents);
+    });
+
+    const response = await request(app).get("/events/");
+    expect(response.status).to.equal(200);
+    expect(response.body).to.deep.equal(mockedGetAllEvents);
   });
 
   it("Should return 200 and create an event ", async () => {

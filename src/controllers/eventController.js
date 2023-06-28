@@ -19,10 +19,9 @@ class EventsController {
     return event;
   }
 
-  async update(
-    { title, description, event_date, event_time, capacity },
-    eventId
-  ) {
+  async update(eventData, eventId) {
+    const { title, description, event_date, event_time, capacity } = eventData;
+
     const dataToUpdate = {
       title,
       description,
@@ -33,7 +32,6 @@ class EventsController {
 
     await Events.update(dataToUpdate, {
       where: { id: eventId },
-      returning: true,
     });
 
     return { id: eventId, ...dataToUpdate };

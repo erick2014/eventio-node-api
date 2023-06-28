@@ -61,7 +61,7 @@ eventRouter.delete("/:id", async (req, res, next) => {
 
   try {
     await eventsController.delete(eventId);
-    res.sendStatus(204);
+    res.send({ success: true });
   } catch (error) {
     next(error);
   }

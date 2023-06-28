@@ -12,6 +12,14 @@ const loginUserSchema = Joi.object({
   password: Joi.string().required().label("Password"),
 });
 
+const eventSchema = Joi.object({
+  title: Joi.string().required().label("Title"),
+  description: Joi.string().required().label("Description"),
+  event_date: Joi.string().required().label("Date"),
+  event_time: Joi.string().required().label("Time"),
+  capacity: Joi.string().required().label("Capacity"),
+});
+
 function validateRequest(joiSchema, method = "body") {
   return function (req, res, next) {
     let requestData = null;
@@ -41,4 +49,9 @@ function validateRequest(joiSchema, method = "body") {
   };
 }
 
-module.exports = { validateRequest, createUserSchema, loginUserSchema };
+module.exports = {
+  validateRequest,
+  createUserSchema,
+  loginUserSchema,
+  eventSchema,
+};

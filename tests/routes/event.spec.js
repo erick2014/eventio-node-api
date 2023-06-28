@@ -8,6 +8,8 @@ const {
   mockedCreateEvent,
   mockedErrorParamsEmptyCreateEvent,
   mockedErrorParamsEmpty,
+  mockedUpdateEvent,
+  mockedDeleteEvent,
 } = require("../mocks/event.mock.js");
 
 describe("Event test", () => {
@@ -176,5 +178,49 @@ describe("Event test", () => {
     const response = await request(app).post("/events/").send(newEvent);
     expect(response.status).to.equal(400);
     expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Capacity"));
+  });
+
+  it("Should return 200 and return the event updated", async () => {
+    const mockEventsController = sinon.stub(
+      EventsController.prototype,
+      "update"
+    );
+
+    mockEventsController.callsFake(() => {
+      return Promise.resolve(mockedUpdateEvent);
+    });
+
+    const eventId = 4;
+
+    const eventUpdate = {
+      title: "Py",
+      description: "learned about Py",
+      event_date: "23/12/2024",
+      event_time: "06:00PM",
+      capacity: "12",
+    };
+
+    const response = await request(app)
+      .put("/events/${eventId}")
+      .send(eventUpdate);
+    expect(response.status).to.equal(200);
+    expect(response.body).to.deep.equal(mockedUpdateEvent);
+  });
+
+  it("Should return 200 and delete an event", async () => {
+    const mockEventsController = sinon.stub(
+      EventsController.prototype,
+      "delete"
+    );
+
+    mockEventsController.callsFake(() => {
+      return Promise.resolve(mockedDeleteEvent);
+    });
+
+    const eventId = 4;
+
+    const response = await request(app).delete("/events/${eventId}");
+    expect(response.status).to.equal(200);
+    expect(response.body).to.deep.equal(mockedDeleteEvent);
   });
 });

@@ -43,9 +43,24 @@ const mockedErrorParamsEmpty = (property) => {
   };
 };
 
+const mockedUpdateEvent = {
+  id: 4,
+  title: "Py",
+  description: "learned about Py",
+  event_date: "23/12/2024",
+  event_time: "06:00PM",
+  capacity: "12",
+};
+
+const mockedDeleteEvent = {
+  success: true,
+};
+
 module.exports = {
   mockedGetAllEvents,
   mockedCreateEvent,
   mockedErrorParamsEmptyCreateEvent,
   mockedErrorParamsEmpty,
+  mockedUpdateEvent,
+  mockedDeleteEvent,
 };

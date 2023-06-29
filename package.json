@@ -9,7 +9,9 @@
     "migration": "npx sequelize-cli db:migrate",
     "create-migration": "npx sequelize-cli migration:generate --name ",
     "undo-migration": "npx sequelize-cli db:migrate:undo",
-    "test": "mocha ./tests/**/*.spec.js"
+    "create-test-tables": "npx sequelize-cli db:migrate --env test",
+    "run-tests": "ENVIRONMENT=test npx mocha ./tests/**/*.spec.js",
+    "test": "npm run create-test-tables && npm run run-tests"
   },
   "keywords": [],
   "author": "",

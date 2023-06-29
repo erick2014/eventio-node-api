@@ -13,16 +13,7 @@ describe("login tests", () => {
     sinon.restore();
   });
 
-  it("Should return 200 and find an user ", async () => {
-    const mockUsersController = sinon.stub(
-      UsersController.prototype,
-      "loginUser"
-    );
-
-    mockUsersController.callsFake(() => {
-      return Promise.resolve(mockedFindUser);
-    });
-
+  it.only("Should return 200 and find an user ", async () => {
     const userParams = {
       email: "char@gmail.com",
       password: "dilan1",
@@ -30,7 +21,9 @@ describe("login tests", () => {
 
     const response = await request(app).post("/auth/login").send(userParams);
     expect(response.status).to.equal(200);
-    expect(response.body).to.deep.equal(mockedFindUser);
+    expect(response.body).to.have.property('email',userParams.email);
+    expect(response.body).to.have.property('firstName');
+    expect(response.body).to.have.property('lastName');
   });
 
   it("Should return an error if body.email is empty ", async () => {

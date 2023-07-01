@@ -13,6 +13,8 @@ const {
 } = require("../mocks/event.mock.js");
 
 describe("Event test", () => {
+  before(() => {});
+
   afterEach(() => {
     sinon.restore();
   });

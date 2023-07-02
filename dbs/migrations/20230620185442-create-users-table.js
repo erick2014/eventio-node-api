@@ -17,7 +17,7 @@ module.exports = {
         primaryKey: true,
         autoIncrement: true,
       },
-      firstName: {
+      name: {
         type: DataTypes.STRING,
         allowNull: false,
       },

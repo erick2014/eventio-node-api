@@ -1,15 +1,24 @@
 const { Users } = require("../models/usersModel.js");
 
 class UsersController {
-  createUser({ firstName, lastName, email, password }) {
-    console.log("here...");
+  async findUser(email) {
+    const findEmail = await Users.findOne({
+      where: { email: email },
+    });
+
+    return findEmail;
+  }
+
+  async createUser(userData) {
+    const { firstName, lastName, email, password } = userData;
+
     const user = Users.create({
       firstName,
       lastName,
       email,
       password,
     });
-    console.log("user found ? ", user);
+
     return user;
   }
 

@@ -43,6 +43,10 @@ class EventsController {
 
     return eventToDelete;
   }
+
+  async deleteEventsInDBCopy() {
+    await Events.destroy({ where: {} });
+  }
 }
 
 module.exports = EventsController;

@@ -16,11 +16,6 @@ userRouter.post(
     const { firstName, lastName, email, password } = req.body;
 
     try {
-      const existingUser = await userController.findUser(email);
-      if (existingUser) {
-        return res.status(500).json({ error: "This user already exists" });
-      }
-
       const newUser = await userController.createUser({
         firstName,
         lastName,

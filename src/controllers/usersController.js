@@ -12,6 +12,11 @@ class UsersController {
   async createUser(userData) {
     const { firstName, lastName, email, password } = userData;
 
+    const existingEmail = await this.findUser(email);
+    if (existingEmail) {
+      throw new Error("This user already exists");
+    }
+
     const user = Users.create({
       firstName,
       lastName,

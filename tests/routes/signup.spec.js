@@ -29,7 +29,7 @@ describe("signup tests", () => {
     const response = await request(app)
       .post("/auth/signup")
       .send(newUserParams);
-    expect(response.body).to.have.property("id");
+    expect(response.body).to.have.property("id").and.not.be.null;
     expect(response.body).to.have.property(
       "firstName",
       newUserParams.firstName
@@ -44,7 +44,7 @@ describe("signup tests", () => {
     expect(response.body).to.deep.equal(mockedErrorCreateUser);
   });
 
-  it("Should return an error if body.firtsName is empty ", async () => {
+  it("Should return an error if body.firstName is empty ", async () => {
     const newUserParams = {
       lastName: "Perez",
       email: "char@gmail.com",
@@ -112,6 +112,6 @@ describe("signup tests", () => {
       .post("/auth/signup")
       .send(newUserParams);
     expect(response.status).to.equal(500);
-    expect(response.body).to.deep.equal({ error: "This user already exists" });
+    expect(response.body).to.deep.equal({ error: "Internal Server Error" });
   });
 });

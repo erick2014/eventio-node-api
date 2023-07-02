@@ -39,15 +39,6 @@ describe("login tests", () => {
   });
 
   it("Should return an error if body.email is empty ", async () => {
-    const mockUsersController = sinon.stub(
-      UsersController.prototype,
-      "loginUser"
-    );
-
-    mockUsersController.callsFake(() => {
-      return Promise.resolve(mockedErrorParamsEmpty("Email"));
-    });
-
     const userParams = {
       password: "dilan1",
     };
@@ -58,15 +49,6 @@ describe("login tests", () => {
   });
 
   it("Should return an error if body.password is empty ", async () => {
-    const mockUsersController = sinon.stub(
-      UsersController.prototype,
-      "loginUser"
-    );
-
-    mockUsersController.callsFake(() => {
-      return Promise.resolve(mockedErrorParamsEmpty("Password"));
-    });
-
     const userParams = {
       email: "char@gmail.com",
     };

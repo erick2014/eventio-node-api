@@ -16,8 +16,11 @@ app.use((err, req, res, next) => {
   if (err.name) {
     console.log(err.name);
   }
+
+  const statusCode = err.statusCode || 500;
+  const errorMessage = err.message || "Internal Server Error";
   console.log(err?.original ? err.original : err);
-  res.status(500).json({ error: "Internal Server Error" });
+  res.status(statusCode).json({ error: errorMessage });
   next();
 });
 

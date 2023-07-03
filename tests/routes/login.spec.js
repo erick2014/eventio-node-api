@@ -37,6 +37,19 @@ describe("login tests", () => {
     expect(response.body).to.have.property("lastName");
   });
 
+  it("Should return 401 and error if insert an email or password invalid ", async () => {
+    const userParams = {
+      email: "char@gmail.com",
+      password: "dilan123",
+    };
+
+    const response = await request(app).post("/auth/login").send(userParams);
+    expect(response.status).to.equal(401);
+    expect(response.body).to.deep.equal({
+      error: "Invalid email or password",
+    });
+  });
+
   it("Should return an error if body.email is empty ", async () => {
     const userParams = {
       password: "dilan1",

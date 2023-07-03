@@ -14,7 +14,9 @@ class UsersController {
 
     const existingEmail = await this.findUser(email);
     if (existingEmail) {
-      throw new Error("This user already exists");
+      const error = new Error("This user already exists");
+      error.statusCode = 400;
+      throw error;
     }
 
     const user = Users.create({
@@ -34,7 +36,9 @@ class UsersController {
     });
 
     if (!userLogin) {
-      throw new Error("Invalid email or password");
+      const error = new Error("Invalid email or password");
+      error.statusCode = 404;
+      throw error;
     }
 
     return {
@@ -44,7 +48,7 @@ class UsersController {
     };
   }
 
-  async deleteUsersInDbCopy() {
+  async deleteAllUsers() {
     await Users.destroy({ where: {} });
   }
 }

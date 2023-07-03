@@ -8,7 +8,6 @@ const userController = new UsersController();
 
 describe("login tests", () => {
   before(async function () {
-    this.timeout(5000);
     await userController.createUser({
       firstName: "Charlotte",
       lastName: "Perez",
@@ -22,7 +21,7 @@ describe("login tests", () => {
   });
 
   after(async () => {
-    await userController.deleteUsersInDbCopy();
+    await userController.deleteAllUsers();
   });
 
   it("Should return 200 and find an user ", async () => {

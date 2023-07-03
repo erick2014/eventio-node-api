@@ -15,7 +15,7 @@ describe("signup tests", () => {
   });
 
   after(async () => {
-    await userController.deleteUsersInDbCopy();
+    await userController.deleteAllUsers();
   });
 
   it("Should return 200 and create an user ", async () => {
@@ -111,7 +111,7 @@ describe("signup tests", () => {
     const response = await request(app)
       .post("/auth/signup")
       .send(newUserParams);
-    expect(response.status).to.equal(500);
-    expect(response.body).to.deep.equal({ error: "Internal Server Error" });
+    expect(response.status).to.equal(400);
+    expect(response.body).to.deep.equal({ error: "This user already exists" });
   });
 });

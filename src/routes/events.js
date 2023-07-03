@@ -14,6 +14,18 @@ eventRouter.get("/", async (_, res, next) => {
   }
 });
 
+eventRouter.post("/:id", async (req, res, next) => {
+  const eventId = parseInt(req.params.id);
+
+  try {
+    const event = await eventsController.getEvent(eventId);
+
+    res.json(event);
+  } catch (error) {
+    next(error);
+  }
+});
+
 eventRouter.post("/", validateRequest(eventSchema), async (req, res, next) => {
   const { title, description, event_date, event_time, capacity } = req.body;
 
@@ -45,10 +57,6 @@ eventRouter.put(
         eventId
       );
 
-      if (!eventUpdated) {
-        return res.status(404).json({ error: "Event not found" });
-      }
-
       res.json(eventUpdated);
     } catch (error) {
       next(error);
@@ -60,8 +68,9 @@ eventRouter.delete("/:id", async (req, res, next) => {
   const eventId = parseInt(req.params.id);
 
   try {
-    await eventsController.delete(eventId);
-    res.send({ success: true });
+    const eventDeleted = await eventsController.delete(eventId);
+
+    res.send(eventDeleted);
   } catch (error) {
     next(error);
   }

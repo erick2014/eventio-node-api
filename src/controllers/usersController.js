@@ -37,7 +37,7 @@ class UsersController {
 
     if (!userLogin) {
       const error = new Error("Invalid email or password");
-      error.statusCode = 404;
+      error.statusCode = 401;
       throw error;
     }
 

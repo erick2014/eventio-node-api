@@ -18,8 +18,9 @@ const getInstance = () => {
     if (!(ENVIRONMENT in config)) {
       throw new Error(`Environment ${ENVIRONMENT} is not supported`);
     }
-    console.log("initializing a new connection instance");
-    sequelize = new Sequelize(config[ENVIRONMENT]);
+    const dbConfig = config[ENVIRONMENT]
+    console.log("initializing a new connection instance ",dbConfig);
+    sequelize = new Sequelize(dbConfig);
     return sequelize;
   } catch (error) {
     console.log("error connecting to the db..");

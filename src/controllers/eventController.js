@@ -1,10 +1,33 @@
 const Events = require("../models/eventsModel.js");
 
 class EventsController {
+  async findEvent(eventId) {
+    const event = await Events.findOne({
+      where: { id: eventId },
+    });
+
+    return event;
+  }
+
   getAllEvents() {
     const allEvents = Events.findAll({ raw: true });
 
     return allEvents;
+  }
+
+  async getEvent(eventId) {
+    const findEvent = await Events.findOne({
+      where: { id: eventId },
+      raw: true,
+    });
+
+    if (!findEvent) {
+      const error = new Error("Event not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    return findEvent;
   }
 
   create({ title, description, event_date, event_time, capacity }) {
@@ -22,6 +45,14 @@ class EventsController {
   async update(eventData, eventId) {
     const { title, description, event_date, event_time, capacity } = eventData;
 
+    const existingEvent = await this.findEvent(eventId);
+
+    if (!existingEvent) {
+      const error = new Error("Event not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
     const dataToUpdate = {
       title,
       description,
@@ -37,11 +68,23 @@ class EventsController {
     return { id: eventId, ...dataToUpdate };
   }
 
-  delete(eventId) {
-    const eventToDelete = Events.findOne({ where: { id: eventId } });
+  async delete(eventId) {
+    const existingEvent = await this.findEvent(eventId);
+
+    if (!existingEvent) {
+      const error = new Error("Event not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    Events.findOne({ where: { id: eventId } });
     Events.destroy({ where: { id: eventId } });
 
-    return eventToDelete;
+    return { success: true };
+  }
+
+  async deleteAllEvents() {
+    await Events.destroy({ where: {} });
   }
 }
 

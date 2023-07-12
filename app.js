@@ -1,4 +1,5 @@
 require("./dotenv.js");
+require("./src/models/associations.js");
 const express = require("express");
 const router = require("./src/routes/index.js");
 

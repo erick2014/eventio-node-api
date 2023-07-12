@@ -1,4 +1,6 @@
 const Events = require("../models/eventsModel.js");
+const Users = require("../models/usersModel.js");
+const EventsAttendees = require("../models/events_attendeesModel.js");
 
 class EventsController {
   async findEvent(eventId) {
@@ -9,9 +11,31 @@ class EventsController {
     return event;
   }
 
+  getUserEvents(userId) {
+    const eventsUser = Events.findAll({
+      attributes: [
+        "id",
+        "title",
+        "description",
+        "event_date",
+        "event_time",
+        "capacity",
+      ],
+      include: [
+        {
+          model: EventsAttendees,
+          attributes: [],
+          where: { user_id: userId },
+        },
+      ],
+    });
+
+    return eventsUser;
+  }
+
   getAllEvents() {
     const allEvents = Events.findAll({ raw: true });
-
+    console.log("esta entrando aca", allEvents);
     return allEvents;
   }
 
@@ -30,7 +54,8 @@ class EventsController {
     return findEvent;
   }
 
-  create({ title, description, event_date, event_time, capacity }) {
+  create(eventData) {
+    const { title, description, event_date, event_time, capacity } = eventData;
     const event = Events.create({
       title,
       description,

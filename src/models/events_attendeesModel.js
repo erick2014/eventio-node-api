@@ -22,6 +22,16 @@ const schemaEventsAttendees = {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
 };
 
 const EventsAttendees = sequelize.define(
@@ -29,8 +39,8 @@ const EventsAttendees = sequelize.define(
   schemaEventsAttendees,
   {
     tableName: "events_attendees",
-    createdAt: false,
-    updatedAt: false,
+    createdAt: true,
+    updatedAt: true,
     freezeTableName: true,
   }
 );

@@ -2,9 +2,6 @@ const { Users } = require("./usersModel.js");
 const EventsAttendees = require("./events_attendeesModel.js");
 const Events = require("./eventsModel.js");
 
-/* Users.hasMany(Events);
-Events.belongsTo(Users, { foreignKey: "user_id" }); */
-
 EventsAttendees.belongsTo(Events, {
   foreignKey: "event_id",
 });

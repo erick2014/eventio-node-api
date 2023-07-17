@@ -1,7 +1,5 @@
-const Events = require("../models/eventsModel.js");
-const Users = require("../models/usersModel.js");
-const EventsAttendees = require("../models/events_attendeesModel.js");
-
+const { Users, EventsAttendees, Events } = require("../models/associations.js");
+const { literal } = require("sequelize");
 class EventsController {
   async findEvent(eventId) {
     const event = await Events.findOne({
@@ -20,16 +18,21 @@ class EventsController {
         "event_date",
         "event_time",
         "capacity",
+        [
+          literal(
+            `(SELECT COUNT(*) FROM events_attendees WHERE event_id = events.id)`
+          ),
+          "userCount",
+        ],
       ],
       include: [
         {
           model: EventsAttendees,
-          attributes: [],
+          attributes: ["isOwner", "event_id", "user_id"],
           where: { user_id: userId },
         },
       ],
     });
-
     return eventsUser;
   }
 
@@ -110,6 +113,16 @@ class EventsController {
 
   async deleteAllEvents() {
     await Events.destroy({ where: {} });
+  }
+
+  createRecordInEventsAttendees(newEvent, userId) {
+    const newAssociation = EventsAttendees.create({
+      isOwner: true,
+      event_id: newEvent.id,
+      user_id: userId,
+    });
+
+    return newAssociation;
   }
 }
 

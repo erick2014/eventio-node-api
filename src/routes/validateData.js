@@ -13,6 +13,7 @@ const loginUserSchema = Joi.object({
 });
 
 const eventSchema = Joi.object({
+  userId: Joi.number().required().label("User Id"),
   title: Joi.string().required().label("Title"),
   description: Joi.string().required().label("Description"),
   event_date: Joi.string().required().label("Date"),

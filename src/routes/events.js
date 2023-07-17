@@ -1,11 +1,11 @@
 const { Router } = require("express");
 const EventsController = require("../controllers/eventController.js");
 const { eventSchema, validateRequest } = require("../routes/validateData.js");
-const EventsAttendees = require("../models/events_attendeesModel.js");
 
 const eventRouter = Router();
 const eventsController = new EventsController();
 
+//Obtiene todos los eventos
 eventRouter.get("/", async (_, res, next) => {
   try {
     const events = await eventsController.getAllEvents();
@@ -15,16 +15,19 @@ eventRouter.get("/", async (_, res, next) => {
   }
 });
 
+//Obtiene los eventos de un usuario
 eventRouter.get("/:id", async (req, res, next) => {
   const userId = req.params.id;
   try {
     const userEvents = await eventsController.getUserEvents(userId);
+
     res.json(userEvents);
   } catch (error) {
     next(error);
   }
 });
 
+//este obtiene un event
 eventRouter.post("/:id", async (req, res, next) => {
   const eventId = parseInt(req.params.id);
 
@@ -37,10 +40,10 @@ eventRouter.post("/:id", async (req, res, next) => {
   }
 });
 
+//Este crea un evento
 eventRouter.post("/", validateRequest(eventSchema), async (req, res, next) => {
-  const { title, description, event_date, event_time, capacity } = req.body;
-
-  const userId = 6;
+  const { title, description, event_date, event_time, capacity, userId } =
+    req.body;
 
   try {
     const newEvent = await eventsController.create({
@@ -49,14 +52,9 @@ eventRouter.post("/", validateRequest(eventSchema), async (req, res, next) => {
       event_date,
       event_time,
       capacity,
-      userId,
     });
 
-    EventsAttendees.create({
-      isOwner: true,
-      event_id: newEvent.id,
-      user_id: userId,
-    });
+    await eventsController.createRecordInEventsAttendees(newEvent, userId);
 
     res.json(newEvent);
   } catch (error) {

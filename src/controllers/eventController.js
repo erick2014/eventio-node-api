@@ -10,35 +10,61 @@ class EventsController {
   }
 
   getUserEvents(userId) {
-    const eventsUser = Events.findAll({
-      attributes: [
-        "id",
-        "title",
-        "description",
-        "event_date",
-        "event_time",
-        "capacity",
-        [
-          literal(
-            `(SELECT COUNT(*) FROM events_attendees WHERE event_id = events.id)`
-          ),
-          "userCount",
+    const eventsUser = Events.findAll(
+      {
+        attributes: [
+          "id",
+          "title",
+          "description",
+          "event_date",
+          "event_time",
+          "capacity",
+          [
+            literal(
+              `(SELECT COUNT(*) FROM events_attendees WHERE event_id = events.id)`
+            ),
+            "userCount",
+          ],
         ],
-      ],
-      include: [
-        {
-          model: EventsAttendees,
-          attributes: ["isOwner", "event_id", "user_id"],
-          where: { user_id: userId },
-        },
-      ],
-    });
+        include: [
+          {
+            model: EventsAttendees,
+            attributes: ["isOwner", "event_id", "user_id"],
+            where: { user_id: userId },
+          },
+        ],
+      },
+      { raw: true }
+    );
     return eventsUser;
   }
 
   getAllEvents() {
-    const allEvents = Events.findAll({ raw: true });
-    console.log("esta entrando aca", allEvents);
+    const allEvents = Events.findAll(
+      {
+        attributes: [
+          "id",
+          "title",
+          "description",
+          "event_date",
+          "event_time",
+          "capacity",
+          [
+            literal(
+              `(SELECT COUNT(*) FROM events_attendees WHERE event_id = events.id)`
+            ),
+            "userCount",
+          ],
+        ],
+        include: [
+          {
+            model: EventsAttendees,
+            attributes: ["isOwner"],
+          },
+        ],
+      },
+      { raw: true }
+    );
     return allEvents;
   }
 

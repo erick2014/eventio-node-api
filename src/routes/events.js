@@ -5,7 +5,7 @@ const { eventSchema, validateRequest } = require("../routes/validateData.js");
 const eventRouter = Router();
 const eventsController = new EventsController();
 
-//Obtiene todos los eventos
+//Oget all events
 eventRouter.get("/", async (_, res, next) => {
   try {
     const events = await eventsController.getAllEvents();
@@ -15,7 +15,7 @@ eventRouter.get("/", async (_, res, next) => {
   }
 });
 
-//Obtiene los eventos de un usuario
+//get all user´s events
 eventRouter.get("/:id", async (req, res, next) => {
   const userId = req.params.id;
   try {
@@ -27,7 +27,7 @@ eventRouter.get("/:id", async (req, res, next) => {
   }
 });
 
-//este obtiene un event
+//get an event
 eventRouter.post("/:id", async (req, res, next) => {
   const eventId = parseInt(req.params.id);
 
@@ -40,7 +40,7 @@ eventRouter.post("/:id", async (req, res, next) => {
   }
 });
 
-//Este crea un evento
+//Create an event
 eventRouter.post("/", validateRequest(eventSchema), async (req, res, next) => {
   const { title, description, event_date, event_time, capacity, userId } =
     req.body;

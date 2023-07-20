@@ -70,8 +70,45 @@ class EventsController {
 
   async getEvent(eventId) {
     const findEvent = await Events.findOne({
-      where: { id: eventId },
-      raw: true,
+      attributes: [
+        "id",
+        "title",
+        "description",
+        "event_date",
+        "event_time",
+        "capacity",
+        [
+          literal(
+            `(SELECT COUNT(*) FROM events_attendees WHERE event_id = events.id)`
+          ),
+          "userCount",
+        ],
+        [
+          literal(
+            `(SELECT user_id FROM events_attendees WHERE event_id = events.id AND isOwner = 1 LIMIT 1)`
+          ),
+          "userCreatedEvent",
+        ],
+        [
+          literal(
+            `(SELECT GROUP_CONCAT(firstName SEPARATOR ', ') FROM users u INNER JOIN events_attendees ea ON ea.user_id = u.id WHERE ea.event_id = events.id)`
+          ),
+          "userNames",
+        ],
+        [
+          literal(
+            `(SELECT GROUP_CONCAT(user_id SEPARATOR ', ') FROM users u INNER JOIN events_attendees ea ON ea.user_id = u.id WHERE ea.event_id = events.id)`
+          ),
+          "idUsers",
+        ],
+      ],
+      include: [
+        {
+          model: EventsAttendees,
+          attributes: ["user_id"],
+          where: { event_id: eventId },
+        },
+      ],
     });
 
     if (!findEvent) {

@@ -9,8 +9,8 @@ class EventsController {
     return event;
   }
 
-  getUserEvents(userId) {
-    const eventsUser = Events.findAll(
+  async getUserEvents(userId) {
+    const eventsUser = await Events.findAll(
       {
         attributes: [
           "id",
@@ -31,11 +31,51 @@ class EventsController {
             model: EventsAttendees,
             attributes: ["isOwner", "event_id", "user_id"],
             where: { user_id: userId },
+            include: [
+              {
+                model: Users,
+                attributes: ["firstName", "lastName"],
+              },
+            ],
           },
         ],
       },
       { raw: true }
     );
+
+    /*     const arrayEventUser = eventsUser.map((event) => {
+      const {
+        id,
+        title,
+        description,
+        event_date,
+        event_time,
+        capacity,
+        userCount,
+        events_attendees,
+      } = event;
+
+      const idOwnerEvent = events_attendees.dataValues.user_id;
+      const nameOwnerEvent = events_attendees.dataValues.user.firstName;
+      const lastNameOwnerEvent = events_attendees.dataValues.user.lastName;
+      const hostEvent = `${nameOwnerEvent} ${lastNameOwnerEvent}`;
+
+      console.log("attendees", events_attendees);
+      return {
+        id,
+        nameEvent: title,
+        descriptionEvent: description,
+        date: event_date,
+        time: event_time,
+        capacity: capacity,
+        cantAttendees: userCount,
+        eventOwner: idOwnerEvent,
+        host: hostEvent,
+        namesAttendees: namesAttendees,
+      };
+    }); */
+
+    /*  console.log(eventsUser); */
     return eventsUser;
   }
 
@@ -60,6 +100,13 @@ class EventsController {
           {
             model: EventsAttendees,
             attributes: ["isOwner"],
+            where: { event_id: eventId, isOwner: true }, // Filtrar solo el owner (isOwner = true)
+            include: [
+              {
+                model: Users,
+                attributes: ["firstName", "lastName"],
+              },
+            ],
           },
         ],
       },
@@ -77,18 +124,18 @@ class EventsController {
         "event_date",
         "event_time",
         "capacity",
-        [
-          literal(
-            `(SELECT GROUP_CONCAT(firstName SEPARATOR ', ') FROM users u INNER JOIN events_attendees ea ON ea.user_id = u.id WHERE ea.event_id = events.id)`
-          ),
-          "userNames",
-        ],
       ],
       include: [
         {
           model: EventsAttendees,
           attributes: ["isOwner", "event_id", "user_id"],
           where: { event_id: eventId },
+          include: [
+            {
+              model: Users,
+              attributes: ["id", "firstName", "lastName"],
+            },
+          ],
         },
       ],
     });
@@ -99,18 +146,53 @@ class EventsController {
       throw error;
     }
 
-    return findEvent;
+    const eventsData = findEvent.get({ plain: true });
+    const attendees = [];
+    let eventOwner = null;
+    eventsData.events_attendees.forEach((element) => {
+      /* const attendee = element.get({ plain: true }); */
+      const attendee = element.user;
+      console.log("element", element);
+
+      if (element.isOwner) {
+        eventOwner = attendee;
+      } else {
+        attendees.push(attendee);
+      }
+    });
+    console.log("attendees", attendees);
+    console.log("eventOwner", eventOwner);
+
+    const hostEvent = `${eventOwner.firstName} ${eventOwner.lastName}`;
+
+    const eventData = {
+      id: eventsData.id,
+      nameEvent: eventsData.title,
+      descriptionEvent: eventsData.description,
+      date: eventsData.event_date,
+      time: eventsData.event_time,
+      capacity: eventsData.capacity,
+      eventOwner: eventOwner.id,
+      host: hostEvent,
+      attendees: attendees,
+    };
+
+    return eventData;
   }
 
-  create(eventData) {
-    const { title, description, event_date, event_time, capacity } = eventData;
-    const event = Events.create({
+  async create(eventData) {
+    const { title, description, event_date, event_time, capacity, userId } =
+      eventData;
+    const event = await Events.create({
       title,
       description,
       event_date,
       event_time,
       capacity,
+      owner_id: userId,
     });
+
+    await this.createRecordInEventsAttendees(event.id, userId, true);
 
     return event;
   }
@@ -160,10 +242,10 @@ class EventsController {
     await Events.destroy({ where: {} });
   }
 
-  createRecordInEventsAttendees(newEvent, userId) {
+  createRecordInEventsAttendees(eventId, userId, isOwner) {
     const newAssociation = EventsAttendees.create({
-      isOwner: true,
-      event_id: newEvent.id,
+      isOwner,
+      event_id: eventId,
       user_id: userId,
     });
 

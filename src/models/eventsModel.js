@@ -39,6 +39,10 @@ const schemaEvents = {
     allowNull: false,
     defaultValue: DataTypes.NOW,
   },
+  owner_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
 };
 
 const Events = sequelize.define("events", schemaEvents, {

@@ -80,64 +80,60 @@ class EventsController {
   }
 
   getAllEvents() {
-    const allEvents = Events.findAll(
-      {
-        attributes: [
-          "id",
-          "title",
-          "description",
-          "event_date",
-          "event_time",
-          "capacity",
-          [
-            literal(
-              `(SELECT COUNT(*) FROM events_attendees WHERE event_id = events.id)`
-            ),
-            "userCount",
+    const allEvents = EventsAttendees.findAll({
+      attributes: [],
+      include: [
+        {
+          model: Events,
+          attributes: [
+            "id",
+            "title",
+            "description",
+            "event_date",
+            "event_time",
+            "capacity",
+            "owner_id",
           ],
-        ],
-        include: [
-          {
-            model: EventsAttendees,
-            attributes: ["isOwner"],
-            where: { event_id: eventId, isOwner: true }, // Filtrar solo el owner (isOwner = true)
-            include: [
-              {
-                model: Users,
-                attributes: ["firstName", "lastName"],
-              },
-            ],
-          },
-        ],
-      },
-      { raw: true }
-    );
+        },
+        {
+          model: Users,
+          attributes: ["id", "firstName", "lastName"],
+        },
+      ],
+    });
+
+    /*     allEvents.map((element) => {
+      const attendee = element.get({ plain: true });
+
+      console.log("elemento", attendee);
+    }); */
+    console.log("allEvents", allEvents);
+
     return allEvents;
   }
 
   async getEvent(eventId) {
-    const findEvent = await Events.findOne({
-      attributes: [
-        "id",
-        "title",
-        "description",
-        "event_date",
-        "event_time",
-        "capacity",
-      ],
+    const findEvent = await EventsAttendees.findAll({
+      attributes: ["event_id", "user_id", "isOwner"],
       include: [
         {
-          model: EventsAttendees,
-          attributes: ["isOwner", "event_id", "user_id"],
-          where: { event_id: eventId },
-          include: [
-            {
-              model: Users,
-              attributes: ["id", "firstName", "lastName"],
-            },
+          model: Users,
+          attributes: ["id", "firstName", "lastName"],
+        },
+        {
+          model: Events,
+          attributes: [
+            "id",
+            "title",
+            "description",
+            "event_date",
+            "event_time",
+            "capacity",
+            "owner_id",
           ],
         },
       ],
+      where: { event_id: eventId },
     });
 
     if (!findEvent) {
@@ -146,32 +142,29 @@ class EventsController {
       throw error;
     }
 
-    const eventsData = findEvent.get({ plain: true });
+    const eventDetail = findEvent[0].event;
+
     const attendees = [];
     let eventOwner = null;
-    eventsData.events_attendees.forEach((element) => {
-      /* const attendee = element.get({ plain: true }); */
-      const attendee = element.user;
-      console.log("element", element);
+    findEvent.forEach((element) => {
+      const attendee = element.get({ plain: true });
 
-      if (element.isOwner) {
-        eventOwner = attendee;
+      if (attendee.isOwner) {
+        eventOwner = attendee.user;
       } else {
-        attendees.push(attendee);
+        attendees.push(attendee.user);
       }
     });
-    console.log("attendees", attendees);
-    console.log("eventOwner", eventOwner);
 
     const hostEvent = `${eventOwner.firstName} ${eventOwner.lastName}`;
 
     const eventData = {
-      id: eventsData.id,
-      nameEvent: eventsData.title,
-      descriptionEvent: eventsData.description,
-      date: eventsData.event_date,
-      time: eventsData.event_time,
-      capacity: eventsData.capacity,
+      id: eventDetail.id,
+      nameEvent: eventDetail.title,
+      descriptionEvent: eventDetail.description,
+      date: eventDetail.event_date,
+      time: eventDetail.event_time,
+      capacity: eventDetail.capacity,
       eventOwner: eventOwner.id,
       host: hostEvent,
       attendees: attendees,

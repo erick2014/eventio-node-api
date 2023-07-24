@@ -5,7 +5,20 @@ const { eventSchema, validateRequest } = require("../routes/validateData.js");
 const eventRouter = Router();
 const eventsController = new EventsController();
 
-//Oget all events
+//get an event
+eventRouter.get("/:eventId", async (req, res, next) => {
+  const eventId = parseInt(req.params.eventId);
+
+  try {
+    const event = await eventsController.getEvent(eventId);
+
+    res.json(event);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/* //get all events
 eventRouter.get("/", async (_, res, next) => {
   try {
     const events = await eventsController.getAllEvents();
@@ -16,8 +29,8 @@ eventRouter.get("/", async (_, res, next) => {
 });
 
 //get all user´s events
-eventRouter.get("/:id", async (req, res, next) => {
-  const userId = req.params.id;
+eventRouter.get("/:userId", async (req, res, next) => {
+  const userId = req.params.userId;
   try {
     const userEvents = await eventsController.getUserEvents(userId);
 
@@ -26,13 +39,20 @@ eventRouter.get("/:id", async (req, res, next) => {
     next(error);
   }
 });
+ */
+//join user to an event
+eventRouter.post("/join", async (req, res, next) => {
+  const { userId, eventId } = req.body;
 
-//get an event
-eventRouter.post("/:id", async (req, res, next) => {
-  const eventId = parseInt(req.params.id);
+  //preguntar si es el owner del evento
 
+  console.log("router join");
   try {
-    const event = await eventsController.getEvent(eventId);
+    const event = await eventsController.createRecordInEventsAttendees(
+      eventId,
+      userId,
+      false
+    );
 
     res.json(event);
   } catch (error) {
@@ -52,9 +72,8 @@ eventRouter.post("/", validateRequest(eventSchema), async (req, res, next) => {
       event_date,
       event_time,
       capacity,
+      userId,
     });
-
-    await eventsController.createRecordInEventsAttendees(newEvent, userId);
 
     res.json(newEvent);
   } catch (error) {

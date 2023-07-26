@@ -79,8 +79,8 @@ class EventsController {
     return eventsUser;
   }
 
-  getAllEvents() {
-    const allEvents = EventsAttendees.findAll({
+  async getAllEvents() {
+    const allEvents = await EventsAttendees.findAll({
       attributes: [],
       include: [
         {
@@ -102,14 +102,52 @@ class EventsController {
       ],
     });
 
-    /*     allEvents.map((element) => {
-      const attendee = element.get({ plain: true });
+    let newArrayAllEvents = allEvents.map((element) => {
+      const event = element.get({ plain: true });
+      return event;
+    });
 
-      console.log("elemento", attendee);
-    }); */
-    console.log("allEvents", allEvents);
+    let eventsList = newArrayAllEvents.reduce((result, element) => {
+      let existsEvent = result.find(
+        (item) => item.event.id === element.event.id
+      );
 
-    return allEvents;
+      if (!existsEvent) {
+        result.push({ event: element.event, attendees: [element.user] });
+      } else {
+        existsEvent.attendees.push(element.user);
+      }
+
+      return result;
+    }, []);
+
+    const events = eventsList.map((element) => {
+      const idOwner = element.event.owner_id;
+
+      element.attendees.forEach((attendee) => {
+        if (attendee.id == idOwner) {
+          const nameOwner = attendee.firstName;
+          const lastNameOwner = attendee.lastName;
+          element.event.nameOwner = `${nameOwner} ${lastNameOwner}`;
+        }
+      });
+
+      element = {
+        id: element.event.id,
+        nameEvent: element.event.title,
+        descriptionEvent: element.event.description,
+        date: element.event.event_date,
+        time: element.event.event_time,
+        capacity: element.event.capacity,
+        eventOwner: element.event.owner_id,
+        host: element.event.nameOwner,
+        attendees: element.attendees,
+      };
+
+      return element;
+    });
+
+    return events;
   }
 
   async getEvent(eventId) {
@@ -151,6 +189,7 @@ class EventsController {
 
       if (attendee.isOwner) {
         eventOwner = attendee.user;
+        attendees.push(attendee.user);
       } else {
         attendees.push(attendee.user);
       }

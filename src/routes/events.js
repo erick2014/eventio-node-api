@@ -6,7 +6,7 @@ const eventRouter = Router();
 const eventsController = new EventsController();
 
 //get an event
-eventRouter.get("/:eventId", async (req, res, next) => {
+eventRouter.get("/event/:eventId", async (req, res, next) => {
   const eventId = parseInt(req.params.eventId);
 
   try {
@@ -18,7 +18,7 @@ eventRouter.get("/:eventId", async (req, res, next) => {
   }
 });
 
-/* //get all events
+//get all events
 eventRouter.get("/", async (_, res, next) => {
   try {
     const events = await eventsController.getAllEvents();
@@ -29,7 +29,7 @@ eventRouter.get("/", async (_, res, next) => {
 });
 
 //get all user´s events
-eventRouter.get("/:userId", async (req, res, next) => {
+eventRouter.get("/user/:userId", async (req, res, next) => {
   const userId = req.params.userId;
   try {
     const userEvents = await eventsController.getUserEvents(userId);
@@ -39,7 +39,7 @@ eventRouter.get("/:userId", async (req, res, next) => {
     next(error);
   }
 });
- */
+
 //join user to an event
 eventRouter.post("/join", async (req, res, next) => {
   const { userId, eventId } = req.body;

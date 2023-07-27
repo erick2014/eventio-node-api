@@ -92,12 +92,14 @@ eventRouter.put(
   "/:id",
   validateRequest(eventSchema),
   async (req, res, next) => {
-    const { title, description, event_date, event_time, capacity } = req.body;
+    const { userId, title, description, event_date, event_time, capacity } =
+      req.body;
     const eventId = parseInt(req.params.id);
+    console.log("id evento ", eventId);
 
     try {
       const eventUpdated = await eventsController.update(
-        { title, description, event_date, event_time, capacity },
+        { title, description, event_date, event_time, capacity, userId },
         eventId
       );
 

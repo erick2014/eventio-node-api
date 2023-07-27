@@ -241,7 +241,7 @@ class EventsController {
       error.statusCode = 404;
       throw error;
     } else if (!userIsOwner) {
-      const error = new Error("Sorry but user isn`t event`s owner");
+      const error = new Error("Sorry but user isn`t owner event`s ");
       error.statusCode = 404;
       throw error;
     }

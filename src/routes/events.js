@@ -1,6 +1,10 @@
 const { Router } = require("express");
 const EventsController = require("../controllers/eventController.js");
-const { eventSchema, validateRequest } = require("../routes/validateData.js");
+const {
+  eventSchema,
+  validateRequest,
+  joinEventSchema,
+} = require("../routes/validateData.js");
 
 const eventRouter = Router();
 const eventsController = new EventsController();
@@ -41,24 +45,27 @@ eventRouter.get("/user/:userId", async (req, res, next) => {
 });
 
 //join user to an event
-eventRouter.post("/join", async (req, res, next) => {
-  const { userId, eventId } = req.body;
+eventRouter.post(
+  "/join",
+  validateRequest(joinEventSchema),
+  async (req, res, next) => {
+    const { userId, eventId } = req.body;
 
-  //preguntar si es el owner del evento
+    try {
+      await eventsController.findUserIsOwnerEvent(userId, eventId);
 
-  console.log("router join");
-  try {
-    const event = await eventsController.createRecordInEventsAttendees(
-      eventId,
-      userId,
-      false
-    );
+      const event = await eventsController.createRecordInEventsAttendees(
+        eventId,
+        userId,
+        false
+      );
 
-    res.json(event);
-  } catch (error) {
-    next(error);
+      res.json(event);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 //Create an event
 eventRouter.post("/", validateRequest(eventSchema), async (req, res, next) => {

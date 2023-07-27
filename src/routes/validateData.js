@@ -21,6 +21,11 @@ const eventSchema = Joi.object({
   capacity: Joi.string().required().label("Capacity"),
 });
 
+const joinEventSchema = Joi.object({
+  userId: Joi.number().required().label("User Id"),
+  eventId: Joi.number().required().label("Event Id"),
+});
+
 function validateRequest(joiSchema, method = "body") {
   return function (req, res, next) {
     let requestData = null;
@@ -55,4 +60,5 @@ module.exports = {
   createUserSchema,
   loginUserSchema,
   eventSchema,
+  joinEventSchema,
 };

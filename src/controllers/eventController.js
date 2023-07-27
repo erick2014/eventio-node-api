@@ -283,6 +283,23 @@ class EventsController {
 
     return newAssociation;
   }
+
+  async findUserIsOwnerEvent(userId, eventId) {
+    const event = await this.findEvent(eventId);
+    let userIsOwner = false;
+
+    if (event.owner_id == userId) {
+      userIsOwner = true;
+    } else {
+      userIsOwner = false;
+    }
+
+    if (userIsOwner) {
+      const error = new Error("User is event`s owner");
+      error.statusCode = 404;
+      throw error;
+    }
+  }
 }
 
 module.exports = EventsController;

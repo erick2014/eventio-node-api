@@ -95,7 +95,6 @@ eventRouter.put(
     const { userId, title, description, event_date, event_time, capacity } =
       req.body;
     const eventId = parseInt(req.params.id);
-    console.log("id evento ", eventId);
 
     try {
       const eventUpdated = await eventsController.update(
@@ -111,10 +110,12 @@ eventRouter.put(
 );
 
 eventRouter.delete("/:id", async (req, res, next) => {
+  // debo eliminar tambien el registro de la tabla eventsAttendees
   const eventId = parseInt(req.params.id);
+  const { userId } = req.body;
 
   try {
-    const eventDeleted = await eventsController.delete(eventId);
+    const eventDeleted = await eventsController.delete(eventId, userId);
 
     res.send(eventDeleted);
   } catch (error) {

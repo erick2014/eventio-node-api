@@ -1,14 +1,6 @@
 const { Users, EventsAttendees, Events } = require("../models/associations.js");
 const { literal } = require("sequelize");
 class EventsController {
-  async findEvent(eventId) {
-    const event = await Events.findOne({
-      where: { id: eventId },
-    });
-
-    return event;
-  }
-
   async getUserEvents(userId) {
     const eventsUser = await Events.findAll(
       {
@@ -43,39 +35,6 @@ class EventsController {
       { raw: true }
     );
 
-    /*     const arrayEventUser = eventsUser.map((event) => {
-      const {
-        id,
-        title,
-        description,
-        event_date,
-        event_time,
-        capacity,
-        userCount,
-        events_attendees,
-      } = event;
-
-      const idOwnerEvent = events_attendees.dataValues.user_id;
-      const nameOwnerEvent = events_attendees.dataValues.user.firstName;
-      const lastNameOwnerEvent = events_attendees.dataValues.user.lastName;
-      const hostEvent = `${nameOwnerEvent} ${lastNameOwnerEvent}`;
-
-      console.log("attendees", events_attendees);
-      return {
-        id,
-        nameEvent: title,
-        descriptionEvent: description,
-        date: event_date,
-        time: event_time,
-        capacity: capacity,
-        cantAttendees: userCount,
-        eventOwner: idOwnerEvent,
-        host: hostEvent,
-        namesAttendees: namesAttendees,
-      };
-    }); */
-
-    /*  console.log(eventsUser); */
     return eventsUser;
   }
 
@@ -102,52 +61,46 @@ class EventsController {
       ],
     });
 
-    let newArrayAllEvents = allEvents.map((element) => {
-      const event = element.get({ plain: true });
-      return event;
-    });
+    let eventsList = allEvents.reduce((result, element) => {
+      let eventElement = element.get({ plain: true });
+      const idOwner = eventElement.event.owner_id;
+      const userEvent = eventElement.user;
 
-    let eventsList = newArrayAllEvents.reduce((result, element) => {
+      if (idOwner == userEvent.id) {
+        const nameOwner = userEvent.firstName;
+        const lastNameOwner = userEvent.lastName;
+        eventElement.event.host = `${nameOwner} ${lastNameOwner}`;
+        eventElement.event.attendees = [userEvent];
+      }
+
+      eventElement.event = {
+        id: eventElement.event.id,
+        nameEvent: eventElement.event.title,
+        descriptionEvent: eventElement.event.description,
+        date: eventElement.event.event_date,
+        time: eventElement.event.event_time,
+        capacity: eventElement.event.capacity,
+        eventOwner: eventElement.event.owner_id,
+        host: eventElement.event.host,
+        attendees: eventElement.event.attendees,
+      };
+
       let existsEvent = result.find(
-        (item) => item.event.id === element.event.id
+        (item) => item.event.id === eventElement.event.id
       );
 
       if (!existsEvent) {
-        result.push({ event: element.event, attendees: [element.user] });
+        eventElement.event.attendees = [eventElement.user];
+        result.push({
+          event: eventElement.event,
+        });
       } else {
-        existsEvent.attendees.push(element.user);
+        existsEvent.event.attendees.push(eventElement.user);
       }
-
       return result;
     }, []);
 
-    const events = eventsList.map((element) => {
-      const idOwner = element.event.owner_id;
-
-      element.attendees.forEach((attendee) => {
-        if (attendee.id == idOwner) {
-          const nameOwner = attendee.firstName;
-          const lastNameOwner = attendee.lastName;
-          element.event.nameOwner = `${nameOwner} ${lastNameOwner}`;
-        }
-      });
-
-      element = {
-        id: element.event.id,
-        nameEvent: element.event.title,
-        descriptionEvent: element.event.description,
-        date: element.event.event_date,
-        time: element.event.event_time,
-        capacity: element.event.capacity,
-        eventOwner: element.event.owner_id,
-        host: element.event.nameOwner,
-        attendees: element.attendees,
-      };
-
-      return element;
-    });
-
-    return events;
+    return eventsList;
   }
 
   async getEvent(eventId) {
@@ -174,7 +127,7 @@ class EventsController {
       where: { event_id: eventId },
     });
 
-    if (!findEvent) {
+    if (!findEvent.length) {
       const error = new Error("Event not found");
       error.statusCode = 404;
       throw error;
@@ -209,6 +162,8 @@ class EventsController {
       attendees: attendees,
     };
 
+    console.log("data event", eventData);
+
     return eventData;
   }
 
@@ -233,14 +188,9 @@ class EventsController {
     const { title, description, event_date, event_time, capacity, userId } =
       eventData;
 
-    const existingEvent = await this.findEvent(eventId);
     const userIsOwner = await this.findUserIsOwnerEvent(userId, eventId);
 
-    if (!existingEvent) {
-      const error = new Error("Event not found");
-      error.statusCode = 404;
-      throw error;
-    } else if (!userIsOwner) {
+    if (!userIsOwner) {
       const error = new Error("Sorry but user isn`t owner event`s ");
       error.statusCode = 404;
       throw error;
@@ -261,16 +211,15 @@ class EventsController {
     return { id: eventId, ...dataToUpdate };
   }
 
-  async delete(eventId) {
-    const existingEvent = await this.findEvent(eventId);
+  async delete(eventId, userId) {
+    const userIsOwner = await this.findUserIsOwnerEvent(userId, eventId);
 
-    if (!existingEvent) {
-      const error = new Error("Event not found");
+    if (!userIsOwner) {
+      const error = new Error("Sorry but user isn`t owner event`s ");
       error.statusCode = 404;
       throw error;
     }
 
-    Events.findOne({ where: { id: eventId } });
     Events.destroy({ where: { id: eventId } });
 
     return { success: true };
@@ -291,19 +240,23 @@ class EventsController {
   }
 
   async findUserIsOwnerEvent(userId, eventId) {
-    const event = await this.findEvent(eventId);
+    let event = await Events.findOne({
+      where: { id: eventId },
+    });
+
+    if (event == null || !event) {
+      const error = new Error("Event not found");
+      error.statusCode = 404;
+      throw error;
+    }
+    event = event.get({ plain: true });
+
     let userIsOwner = false;
 
     if (event.owner_id == userId) {
       userIsOwner = true;
     } else {
       userIsOwner = false;
-    }
-
-    if (userIsOwner) {
-      const error = new Error("User is event`s owner");
-      error.statusCode = 404;
-      throw error;
     }
 
     return userIsOwner;

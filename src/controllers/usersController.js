@@ -30,6 +30,14 @@ class UsersController {
   }
 
   async loginUser({ email, password }) {
+    const userExists = await this.findUser(email);
+
+    if (userExists == null) {
+      const error = new Error("User does not exist");
+      error.statusCode = 401;
+      throw error;
+    }
+
     const userLogin = await Users.findOne({
       where: { email: email, password: password },
       raw: true,
@@ -42,6 +50,7 @@ class UsersController {
     }
 
     return {
+      id: userLogin.id,
       firstName: userLogin.firstName,
       lastName: userLogin.lastName,
       email: userLogin.email,

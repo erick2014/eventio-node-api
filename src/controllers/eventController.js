@@ -190,6 +190,7 @@ class EventsController {
       event_date,
       event_time,
       capacity,
+      owner_id: userId,
     };
 
     await Events.update(dataToUpdate, {
@@ -215,6 +216,7 @@ class EventsController {
 
   async deleteAllEvents() {
     await Events.destroy({ where: {} });
+    await EventsAttendees.destroy({ where: {} });
   }
 
   createRecordInEventsAttendees(eventId, userId, isOwner) {

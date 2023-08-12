@@ -4,6 +4,8 @@ const sinon = require("sinon");
 const expect = require("chai").expect;
 const EventsController = require("../../src/controllers/eventController.js");
 const eventsController = new EventsController();
+const UsersController = require("../../src/controllers/usersController.js");
+const usersController = new UsersController();
 const {
   mockedErrorParamsEmptyCreateEvent,
   mockedErrorParamsEmpty,
@@ -13,12 +15,25 @@ describe("Event test", () => {
   let createdEvent;
 
   before(async () => {
+    await usersController.createUser({
+      firstName: "Dilan",
+      lastName: "Toloza",
+      email: "dilan123@gmail.com",
+      password: "dilan",
+    });
+
+    const existingUser = await usersController.loginUser({
+      email: "dilan123@gmail.com",
+      password: "dilan",
+    });
+
     const eventData = {
       title: "Inglés",
       description: "Learn Inglés",
       event_date: "23/01/1993",
       event_time: "18:00PM",
       capacity: 10,
+      userId: existingUser.id,
     };
 
     createdEvent = await eventsController.create(eventData);
@@ -30,6 +45,7 @@ describe("Event test", () => {
 
   after(async () => {
     await eventsController.deleteAllEvents();
+    await usersController.deleteAllUsers();
   });
 
   it("Should return 200 and all events in the database", async () => {
@@ -39,31 +55,27 @@ describe("Event test", () => {
     expect(response.body.length).to.be.greaterThan(0);
 
     const firstEvent = response.body[0];
-    expect(firstEvent).to.have.property("id");
-    expect(firstEvent).to.have.property("title");
-    expect(firstEvent).to.have.property("description");
-    expect(firstEvent).to.have.property("event_date");
-    expect(firstEvent).to.have.property("event_time");
+    expect(firstEvent).to.have.property("id").and.not.be.null;
+    expect(firstEvent).to.have.property("nameEvent");
+    expect(firstEvent).to.have.property("descriptionEvent");
+    expect(firstEvent).to.have.property("date");
+    expect(firstEvent).to.have.property("time");
     expect(firstEvent).to.have.property("capacity");
+    expect(firstEvent).to.have.property("eventOwner");
+    expect(firstEvent).to.have.property("host");
+    expect(firstEvent).to.have.property("attendees");
   });
 
-  it("Should return 200 and create an event ", async () => {
-    const newEvent = {
-      title: "Python",
-      description: "learned about Python",
-      event_date: "23/12/2024",
-      event_time: "06:00PM",
-      capacity: "12",
-    };
+  it("Should create an event ", async () => {
+    createdEvent = createdEvent.get({ plain: true });
 
-    const response = await request(app).post("/events/").send(newEvent);
-    expect(response.status).to.equal(200);
-    expect(response.body).to.have.property("id").and.not.be.null;
-    expect(response.body).to.have.property("title");
-    expect(response.body).to.have.property("description");
-    expect(response.body).to.have.property("event_date");
-    expect(response.body).to.have.property("event_time");
-    expect(response.body).to.have.property("capacity");
+    expect(createdEvent).to.have.property("id").and.not.be.null;
+    expect(createdEvent).to.have.property("title");
+    expect(createdEvent).to.have.property("description");
+    expect(createdEvent).to.have.property("event_date");
+    expect(createdEvent).to.have.property("event_time");
+    expect(createdEvent).to.have.property("capacity");
+    expect(createdEvent).to.have.property("owner_id");
   });
 
   it("Should return an error if body is empty ", async () => {
@@ -78,6 +90,7 @@ describe("Event test", () => {
       event_date: "23/12/2024",
       event_time: "06:00PM",
       capacity: "12",
+      userId: 1,
     };
 
     const response = await request(app).post("/events/").send(newEvent);
@@ -91,6 +104,7 @@ describe("Event test", () => {
       event_date: "23/12/2024",
       event_time: "06:00PM",
       capacity: "12",
+      userId: 1,
     };
 
     const response = await request(app).post("/events/").send(newEvent);
@@ -104,6 +118,7 @@ describe("Event test", () => {
       description: "learned about Python",
       event_time: "06:00PM",
       capacity: "12",
+      userId: 1,
     };
 
     const response = await request(app).post("/events/").send(newEvent);
@@ -117,6 +132,7 @@ describe("Event test", () => {
       description: "learned about Python",
       event_date: "23/12/2024",
       capacity: "12",
+      userId: 1,
     };
 
     const response = await request(app).post("/events/").send(newEvent);
@@ -130,11 +146,26 @@ describe("Event test", () => {
       description: "learned about Python",
       event_date: "23/12/2024",
       event_time: "06:00PM",
+      userId: 1,
     };
 
     const response = await request(app).post("/events/").send(newEvent);
     expect(response.status).to.equal(400);
     expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Capacity"));
+  });
+
+  it("Should return an error if body.userId is empty", async () => {
+    const newEvent = {
+      title: "Python",
+      description: "learned about Python",
+      event_date: "23/12/2024",
+      event_time: "06:00PM",
+      capacity: "12",
+    };
+
+    const response = await request(app).post("/events/").send(newEvent);
+    expect(response.status).to.equal(400);
+    expect(response.body).to.deep.equal(mockedErrorParamsEmpty("User Id"));
   });
 
   it("Should return 200 and return the event updated", async () => {
@@ -145,6 +176,7 @@ describe("Event test", () => {
       event_date: "23/12/2024",
       event_time: "06:00PM",
       capacity: "12",
+      userId: createdEvent.owner_id,
     };
 
     const response = await request(app)
@@ -164,6 +196,7 @@ describe("Event test", () => {
       event_date: "23/12/2024",
       event_time: "06:00PM",
       capacity: "12",
+      userId: 1,
     };
     const response = await request(app)
       .put(`/events/${eventId}`)
@@ -174,19 +207,24 @@ describe("Event test", () => {
 
   it("Should return 200 and find an event", async () => {
     const eventId = createdEvent.id;
-    const response = await request(app).post(`/events/${eventId}`);
+    const response = await request(app).get(`/events/event/${eventId}`);
+
     expect(response.status).to.equal(200);
-    expect(response.body).to.have.property("id");
-    expect(response.body).to.have.property("title");
-    expect(response.body).to.have.property("description");
-    expect(response.body).to.have.property("event_date");
-    expect(response.body).to.have.property("event_time");
+    expect(response.body).to.have.property("id").and.not.be.null;
+    expect(response.body).to.have.property("nameEvent");
+    expect(response.body).to.have.property("descriptionEvent");
+    expect(response.body).to.have.property("date");
+    expect(response.body).to.have.property("time");
     expect(response.body).to.have.property("capacity");
+    expect(response.body).to.have.property("eventOwner");
+    expect(response.body).to.have.property("host");
+    expect(response.body).to.have.property("attendees");
+    expect(response.body).to.have.property("nameAttendees");
   });
 
-  it("POST /events/ Should return 404 and an error if event does not exist", async () => {
+  it("GET /events/ Should return 404 and an error if event does not exist", async () => {
     const eventId = 10;
-    const response = await request(app).post(`/events/${eventId}`);
+    const response = await request(app).get(`/events/event/${eventId}`);
     expect(response.status).to.equal(404);
     expect(response.body).to.deep.equal({ error: "Event not found" });
   });
@@ -194,7 +232,9 @@ describe("Event test", () => {
   it("Should return 200 and delete an event", async () => {
     const eventId = createdEvent.id;
 
-    const response = await request(app).delete(`/events/${eventId}`);
+    const response = await request(app)
+      .delete(`/events/${eventId}`)
+      .send({ userId: createdEvent.owner_id });
     expect(response.status).to.equal(200);
     expect(response.body).to.deep.equal({
       success: true,
@@ -203,7 +243,9 @@ describe("Event test", () => {
 
   it("DELETE /events/ Should return 404 and an error if event does not exist", async () => {
     const eventId = 10;
-    const response = await request(app).delete(`/events/${eventId}`);
+    const response = await request(app)
+      .delete(`/events/${eventId}`)
+      .send({ userId: createdEvent.owner_id });
     expect(response.status).to.equal(404);
     expect(response.body).to.deep.equal({ error: "Event not found" });
   });

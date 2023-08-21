@@ -1,13 +1,41 @@
-const { array } = require("joi");
 const { Users, EventsAttendees, Events } = require("../models/associations.js");
 const { fn, col, where } = require("sequelize");
 class EventsController {
+
+  buildEventData(eventDetail){
+    eventDetail = eventDetail.get({ plain: true });
+    const eventData = eventDetail.event;
+    const dataOwnerEvent = eventDetail.user;
+    const hostEvent = `${dataOwnerEvent.firstName} ${dataOwnerEvent.lastName}`;
+    const attendeesIdUser = eventDetail.attendeesId.split(",");
+    let attendeesNames
+
+    if(eventDetail.attendees){
+      attendeesNames = eventDetail.attendees.split(",");
+    }
+
+    const event = {
+      id: eventData.id,
+      nameEvent: eventData.title,
+      descriptionEvent: eventData.description,
+      date: eventData.event_date,
+      time: eventData.event_time,
+      capacity: eventData.capacity,
+      eventOwner: eventData.owner_id,
+      host: hostEvent,
+      attendees: attendeesIdUser,
+      ...(attendeesNames && {attendeesNames}),
+    };
+
+    return event
+  }
+
   async getUserEvents(userId) {
     const eventsUser = await EventsAttendees.findAll({
       group: "event_id", // Group by event_id from the EventsAttendees table
-      having: where(fn("FIND_IN_SET", userId, col("attendees")), ">", 0),
+      having: where(fn("FIND_IN_SET", userId, col("attendeesId")), ">", 0),
       attributes: [
-        [fn("GROUP_CONCAT", col("events_attendees.user_id")), "attendees"],
+        [fn("GROUP_CONCAT", col("events_attendees.user_id")), "attendeesId"],
       ],
       include: [
         {
@@ -30,22 +58,7 @@ class EventsController {
     });
 
     let eventsList = eventsUser.map((element) => {
-      let eventElement = element.get({ plain: true });
-      let ownerEventData = eventElement.user;
-      let ownerEvent = `${ownerEventData.firstName} ${ownerEventData.lastName}`;
-      let idAttendees = eventElement.attendees.split(",");
-
-      return {
-        id: eventElement.event.id,
-        nameEvent: eventElement.event.title,
-        descriptionEvent: eventElement.event.description,
-        date: eventElement.event.event_date,
-        time: eventElement.event.event_time,
-        capacity: eventElement.event.capacity,
-        eventOwner: eventElement.event.owner_id,
-        host: ownerEvent,
-        attendees: idAttendees,
-      };
+      return this.buildEventData(element)
     });
 
     return eventsList;
@@ -54,7 +67,7 @@ class EventsController {
   async getAllEvents() {
     const allEvents = await EventsAttendees.findAll({
       group: "event_id",
-      attributes: [[fn("GROUP_CONCAT", col("user_id")), "attendees"]],
+      attributes: [[fn("GROUP_CONCAT", col("user_id")), "attendeesId"]],
       include: [
         {
           model: Events,
@@ -76,22 +89,8 @@ class EventsController {
     });
 
     let eventsList = allEvents.map((element) => {
-      let eventElement = element.get({ plain: true });
-      let ownerEventData = eventElement.user;
-      let ownerEvent = `${ownerEventData.firstName} ${ownerEventData.lastName}`;
-      let idAttendees = eventElement.attendees.split(",");
-
-      return {
-        id: eventElement.event.id,
-        nameEvent: eventElement.event.title,
-        descriptionEvent: eventElement.event.description,
-        date: eventElement.event.event_date,
-        time: eventElement.event.event_time,
-        capacity: eventElement.event.capacity,
-        eventOwner: eventElement.event.owner_id,
-        host: ownerEvent,
-        attendees: idAttendees,
-      };
+      return this.buildEventData(element)
+       
     });
 
     return eventsList;
@@ -131,28 +130,10 @@ class EventsController {
       throw error;
     }
 
-    let eventDetail = findEvent[0];
-    eventDetail = eventDetail.get({ plain: true });
-    const eventData = eventDetail.event;
-    const dataOwnerEvent = eventDetail.user;
-    const hostEvent = `${dataOwnerEvent.firstName} ${dataOwnerEvent.lastName}`;
-    const attendeesIdUser = eventDetail.attendeesId.split(",");
-    const attendeesNames = eventDetail.attendees.split(",");
+    const eventDetail = findEvent[0];
+    const eventData = this.buildEventData(eventDetail)
 
-    const event = {
-      id: eventData.id,
-      nameEvent: eventData.title,
-      descriptionEvent: eventData.description,
-      date: eventData.event_date,
-      time: eventData.event_time,
-      capacity: eventData.capacity,
-      eventOwner: eventData.owner_id,
-      host: hostEvent,
-      attendees: attendeesIdUser,
-      nameAttendees: attendeesNames,
-    };
-
-    return event;
+    return eventData;
   }
 
   async create(eventData) {

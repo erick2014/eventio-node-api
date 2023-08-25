@@ -1,11 +1,9 @@
 const { Router } = require("express");
-const EventsController = require("../controllers/eventController.js");
-const {
-  eventSchema,
-  validateRequest,
-  joinEventSchema,
-} = require("../routes/validateData.js");
+const { validateRequest } = require("../middlewares/validateData.js");
+const { eventSchema,joinEventSchema, eventEditSchema } = require("./schemas/events.js");
+const { findUserIsOwnerEvent } = require("../middlewares/validateIsOwner.js")
 
+const EventsController = require("../controllers/eventController.js");
 const eventRouter = Router();
 const eventsController = new EventsController();
 
@@ -90,18 +88,15 @@ eventRouter.post("/", validateRequest(eventSchema), async (req, res, next) => {
 
 eventRouter.put(
   "/:id",
-  validateRequest(eventSchema),
+  validateRequest(eventEditSchema),
+  findUserIsOwnerEvent,
   async (req, res, next) => {
-    const { userId, title, description, event_date, event_time, capacity } =
-      req.body;
     const eventId = parseInt(req.params.id);
-
     try {
       const eventUpdated = await eventsController.update(
-        { title, description, event_date, event_time, capacity, userId },
+        req.body,
         eventId
       );
-
       res.json(eventUpdated);
     } catch (error) {
       next(error);

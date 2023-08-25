@@ -4,7 +4,7 @@ const {
   validateRequest,
   createUserSchema,
   loginUserSchema,
-} = require("./validateData.js");
+} = require("../middlewares/validateData.js");
 
 const userRouter = Router();
 const userController = new UsersController();

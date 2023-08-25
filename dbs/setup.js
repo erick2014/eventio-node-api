@@ -7,7 +7,6 @@ const getInstance = () => {
     const { ENVIRONMENT } = process.env;
 
     if (sequelize) {
-      console.log("returning instance already found...");
       return sequelize;
     }
 

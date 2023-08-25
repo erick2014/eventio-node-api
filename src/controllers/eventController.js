@@ -154,30 +154,13 @@ class EventsController {
   }
 
   async update(eventData, eventId) {
-    const { title, description, event_date, event_time, capacity, userId } =
-      eventData;
-
-    const userIsOwner = await this.findUserIsOwnerEvent(userId, eventId);
-
-    if (!userIsOwner) {
-      const error = new Error("Sorry but user isn`t owner event`s ");
-      error.statusCode = 404;
-      throw error;
-    }
-
+    const { userId, ...userParams } =eventData;
     const dataToUpdate = {
-      title,
-      description,
-      event_date,
-      event_time,
-      capacity,
-      owner_id: userId,
+      ...userParams,
     };
-
     await Events.update(dataToUpdate, {
       where: { id: eventId },
     });
-
     return { id: eventId, ...dataToUpdate };
   }
 
@@ -189,9 +172,7 @@ class EventsController {
       error.statusCode = 404;
       throw error;
     }
-
     Events.destroy({ where: { id: eventId } });
-
     return { success: true };
   }
 

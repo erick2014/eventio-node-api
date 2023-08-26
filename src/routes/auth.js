@@ -2,9 +2,10 @@ const { Router } = require("express");
 const UsersController = require("../controllers/usersController.js");
 const {
   validateRequest,
-  createUserSchema,
-  loginUserSchema,
 } = require("../middlewares/validateData.js");
+
+const { createUserSchema } = require("./schemas/user.js")
+const { loginUserSchema } = require("./schemas/login.js")
 
 const userRouter = Router();
 const userController = new UsersController();
@@ -13,16 +14,14 @@ userRouter.post(
   "/signup",
   validateRequest(createUserSchema),
   async (req, res, next) => {
-    const { firstName, lastName, email, password } = req.body;
-
     try {
+      const { firstName, lastName, email, password } = req.body;
       const newUser = await userController.createUser({
         firstName,
         lastName,
         email,
         password,
       });
-
       res.json(newUser);
     } catch (error) {
       next(error);

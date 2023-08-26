@@ -15,27 +15,20 @@ describe("Event test", () => {
   let createdEvent;
 
   before(async () => {
-    await usersController.createUser({
+    const user = await usersController.createUser({
       firstName: "Dilan",
       lastName: "Toloza",
       email: "dilan123@gmail.com",
       password: "dilan",
     });
-
-    const existingUser = await usersController.loginUser({
-      email: "dilan123@gmail.com",
-      password: "dilan",
-    });
-
     const eventData = {
       title: "Inglés",
       description: "Learn Inglés",
       event_date: "23/01/1993",
       event_time: "18:00PM",
       capacity: 10,
-      userId: existingUser.id,
+      userId: user.id,
     };
-
     createdEvent = await eventsController.create(eventData);
   });
 
@@ -208,7 +201,6 @@ describe("Event test", () => {
   it("Should return 200 and find an event", async () => {
     const eventId = createdEvent.id;
     const response = await request(app).get(`/events/event/${eventId}`);
-
     expect(response.status).to.equal(200);
     expect(response.body).to.have.property("id").and.not.be.null;
     expect(response.body).to.have.property("nameEvent");
@@ -219,7 +211,7 @@ describe("Event test", () => {
     expect(response.body).to.have.property("eventOwner");
     expect(response.body).to.have.property("host");
     expect(response.body).to.have.property("attendees");
-    expect(response.body).to.have.property("nameAttendees");
+    expect(response.body).to.have.property("attendeesNames");
   });
 
   it("GET /events/ Should return 404 and an error if event does not exist", async () => {

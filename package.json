@@ -11,12 +11,15 @@
     "undo-migration": "npx sequelize-cli db:migrate:undo",
     "create-test-tables": "npx sequelize-cli db:migrate --env test",
     "run-tests": "ENVIRONMENT=test npx mocha ./tests/**/*.spec.js",
-    "test": "npm run create-test-tables && npm run run-tests"
+    "test": "npm run create-test-tables && npm run run-tests",
+    "seeders": "npx sequelize db:seed:all",
+    "seeder": "npx sequelize db:seed --seed "
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "joi": "^17.9.2",
@@ -24,10 +27,10 @@
     "sequelize": "^6.31.1"
   },
   "devDependencies": {
-    "nodemon": "^2.0.22",
-    "sequelize-cli": "^6.6.0",
     "chai": "^4.3.7",
     "mocha": "^10.2.0",
+    "nodemon": "^2.0.22",
+    "sequelize-cli": "^6.6.0",
     "sinon": "^15.1.2",
     "supertest": "^6.3.3"
   }

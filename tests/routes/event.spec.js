@@ -32,10 +32,6 @@ describe("Event test", () => {
     createdEvent = await eventsController.create(eventData);
   });
 
-  afterEach(() => {
-    sinon.restore();
-  });
-
   after(async () => {
     await eventsController.deleteAllEvents();
     await usersController.deleteAllUsers();
@@ -232,6 +228,19 @@ describe("Event test", () => {
       success: true,
     });
   });
+
+/*   it.only("DELETE /events/ Should return 404 and an error if user isn`t owner event`s ", async () => {
+    const eventId = createdEvent.id;
+
+    const response = await request(app)
+      .delete(`/events/${eventId}`)
+      .send({ userId: 10 });
+    console.log("respuesta del delete", response.body);
+    expect(response.status).to.equal(404);
+    expect(response.body).to.deep.equal({
+      error: "Sorry but user isn`t owner event`s ",
+    });
+  }); */
 
   it("DELETE /events/ Should return 404 and an error if event does not exist", async () => {
     const eventId = 10;

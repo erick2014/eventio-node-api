@@ -25,10 +25,20 @@ module.exports = {
       event_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+          model: 'events',
+          key: 'id',
+          onDelete: 'CASCADE', 
+        },
       },
       user_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+          model: 'users', 
+          key: 'id',
+          onDelete: 'CASCADE',
+        },
       },
       createdAt: {
         type: DataTypes.DATE,

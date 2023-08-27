@@ -50,8 +50,6 @@ eventRouter.post(
     const { userId, eventId } = req.body;
 
     try {
-      await eventsController.findUserIsOwnerEvent(userId, eventId);
-
       const event = await eventsController.createRecordInEventsAttendees(
         eventId,
         userId,
@@ -65,20 +63,25 @@ eventRouter.post(
   }
 );
 
+//leave of an event
+eventRouter.delete(
+  "/leave", findUserIsOwnerEvent, async(req, res, next) => {
+    try {
+      const deleteRecord = await eventsController.deleteRecordFromEventsAttendees(req.body);
+      res.send(deleteRecord);
+    } catch (error) {
+      next(error);
+    }
+  }
+)
+
 //Create an event
 eventRouter.post("/", validateRequest(eventSchema), async (req, res, next) => {
-  const { title, description, event_date, event_time, capacity, userId } =
-    req.body;
 
   try {
-    const newEvent = await eventsController.create({
-      title,
-      description,
-      event_date,
-      event_time,
-      capacity,
-      userId,
-    });
+    const newEvent = await eventsController.create(
+      req.body
+    );
 
     res.json(newEvent);
   } catch (error) {
@@ -86,6 +89,7 @@ eventRouter.post("/", validateRequest(eventSchema), async (req, res, next) => {
   }
 });
 
+//update an event
 eventRouter.put(
   "/:id",
   validateRequest(eventEditSchema),
@@ -104,13 +108,13 @@ eventRouter.put(
   }
 );
 
-eventRouter.delete("/:id", async (req, res, next) => {
+//delete an event
+eventRouter.delete("/:id", findUserIsOwnerEvent, async (req, res, next) => {
   // debo eliminar tambien el registro de la tabla eventsAttendees
   const eventId = parseInt(req.params.id);
-  const { userId } = req.body;
 
   try {
-    const eventDeleted = await eventsController.delete(eventId, userId);
+    const eventDeleted = await eventsController.delete(eventId);
 
     res.send(eventDeleted);
   } catch (error) {

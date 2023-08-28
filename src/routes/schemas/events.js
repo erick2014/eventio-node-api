@@ -18,7 +18,7 @@ const eventEditSchema = Joi.object({
   capacity: Joi.string().optional().label("Capacity"),
 });
 
-const joinEventSchema = Joi.object({
+const joinAndLeaveEventSchema = Joi.object({
   userId: Joi.number().required().label("User Id"),
   eventId: Joi.number().required().label("Event Id"),
 });
@@ -26,5 +26,5 @@ const joinEventSchema = Joi.object({
 module.exports={
   eventEditSchema,
   eventSchema,
-  joinEventSchema
+  joinAndLeaveEventSchema
 }

@@ -148,7 +148,7 @@ class EventsController {
       owner_id: userId,
     });
 
-    await this.createRecordInEventsAttendees(event.id, userId, true);
+    await this.joinEvent(event.id, userId, true);
 
     return event;
   }
@@ -164,14 +164,7 @@ class EventsController {
     return { id: eventId, ...dataToUpdate };
   }
 
-  async delete(eventId, userId) {
-    const userIsOwner = await this.findUserIsOwnerEvent(userId, eventId);
-
-    if (!userIsOwner) {
-      const error = new Error("Sorry but user isn`t owner event`s ");
-      error.statusCode = 404;
-      throw error;
-    }
+  async delete(eventId) {
     Events.destroy({ where: { id: eventId } });
     return { success: true };
   }
@@ -181,7 +174,7 @@ class EventsController {
     await EventsAttendees.destroy({ where: {} });
   }
 
-  createRecordInEventsAttendees(eventId, userId, isOwner) {
+  joinEvent(eventId, userId, isOwner) {
     const newAssociation = EventsAttendees.create({
       isOwner,
       event_id: eventId,
@@ -191,27 +184,11 @@ class EventsController {
     return newAssociation;
   }
 
-  async findUserIsOwnerEvent(userId, eventId) {
-    let event = await Events.findOne({
-      where: { id: eventId },
-    });
-
-    if (event == null || !event) {
-      const error = new Error("Event not found");
-      error.statusCode = 404;
-      throw error;
-    }
-    event = event.get({ plain: true });
-
-    let userIsOwner = false;
-
-    if (event.owner_id == userId) {
-      userIsOwner = true;
-    } else {
-      userIsOwner = false;
-    }
-
-    return userIsOwner;
+  async leaveEvent(data) {
+    const { userId, eventId } = data;
+    
+    EventsAttendees.destroy({ where : {event_id: eventId, user_id: userId}})
+    return { success: true }; 
   }
 }
 

@@ -8,14 +8,11 @@ EventsAttendees.belongsTo(Events, {
 EventsAttendees.belongsTo(Users, { foreignKey: "user_id" });
 
 Events.hasMany(EventsAttendees, {
-  foreignKey: "event_id",
-  onDelete: "CASCADE",
-  hooks: true
+  foreignKey: "event_id"
 });
+
 Users.hasMany(EventsAttendees, { 
-  foreignKey: "user_id", 
-  onDelete: "CASCADE", 
-  hooks: true  
+  foreignKey: "user_id"
 });
 
 module.exports = {

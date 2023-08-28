@@ -158,9 +158,11 @@ class EventsController {
     const dataToUpdate = {
       ...userParams,
     };
+
     await Events.update(dataToUpdate, {
       where: { id: eventId },
     });
+    
     return { id: eventId, ...dataToUpdate };
   }
 
@@ -175,13 +177,13 @@ class EventsController {
   }
 
   joinEvent(eventId, userId, isOwner) {
-    const newAssociation = EventsAttendees.create({
+    EventsAttendees.create({
       isOwner,
       event_id: eventId,
       user_id: userId,
     });
 
-    return newAssociation;
+    return { success: true };
   }
 
   async leaveEvent(data) {

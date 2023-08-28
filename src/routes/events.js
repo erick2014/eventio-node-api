@@ -1,7 +1,8 @@
 const { Router } = require("express");
 const { validateRequest } = require("../middlewares/validateData.js");
-const { eventSchema,joinEventSchema, eventEditSchema } = require("./schemas/events.js");
+const { eventSchema, joinAndLeaveEventSchema, eventEditSchema } = require("./schemas/events.js");
 const { findUserIsOwnerEvent } = require("../middlewares/validateIsOwner.js")
+const  { validateJoinOrLeaveEvent } = require("../middlewares/validateJoinOrLeaveEvent.js")
 
 const EventsController = require("../controllers/eventController.js");
 const eventRouter = Router();
@@ -45,12 +46,13 @@ eventRouter.get("/user/:userId", async (req, res, next) => {
 //join user to an event
 eventRouter.post(
   "/join",
-  validateRequest(joinEventSchema),
+  validateRequest(joinAndLeaveEventSchema),
+  validateJoinOrLeaveEvent,
   async (req, res, next) => {
     const { userId, eventId } = req.body;
 
     try {
-      const event = await eventsController.createRecordInEventsAttendees(
+      const event = await eventsController.joinEvent(
         eventId,
         userId,
         false
@@ -65,9 +67,11 @@ eventRouter.post(
 
 //leave of an event
 eventRouter.delete(
-  "/leave", findUserIsOwnerEvent, async(req, res, next) => {
+  "/leave", 
+  validateRequest(joinAndLeaveEventSchema),
+  validateJoinOrLeaveEvent, async(req, res, next) => {
     try {
-      const deleteRecord = await eventsController.deleteRecordFromEventsAttendees(req.body);
+      const deleteRecord = await eventsController.leaveEvent(req.body);
       res.send(deleteRecord);
     } catch (error) {
       next(error);
@@ -110,7 +114,6 @@ eventRouter.put(
 
 //delete an event
 eventRouter.delete("/:id", findUserIsOwnerEvent, async (req, res, next) => {
-  // debo eliminar tambien el registro de la tabla eventsAttendees
   const eventId = parseInt(req.params.id);
 
   try {

@@ -2,7 +2,8 @@ const { Router } = require("express");
 const { validateRequest } = require("../middlewares/validateData.js");
 const { eventSchema, joinAndLeaveEventSchema, eventEditSchema } = require("./schemas/events.js");
 const { findUserIsOwnerEvent } = require("../middlewares/validateIsOwner.js")
-const  { validateJoinOrLeaveEvent } = require("../middlewares/validateJoinOrLeaveEvent.js")
+const  { validateLeaveEvent } = require("../middlewares/validateLeaveEvent.js")
+const { validateJoinEvent } = require("../middlewares/validateJoinEvent.js")
 
 const EventsController = require("../controllers/eventController.js");
 const eventRouter = Router();
@@ -47,18 +48,18 @@ eventRouter.get("/user/:userId", async (req, res, next) => {
 eventRouter.post(
   "/join",
   validateRequest(joinAndLeaveEventSchema),
-  validateJoinOrLeaveEvent,
+  validateJoinEvent,
   async (req, res, next) => {
     const { userId, eventId } = req.body;
 
     try {
-      const event = await eventsController.joinEvent(
+      const joinToEvent = await eventsController.joinEvent(
         eventId,
         userId,
         false
       );
 
-      res.json(event);
+      res.send(joinToEvent);
     } catch (error) {
       next(error);
     }
@@ -69,10 +70,10 @@ eventRouter.post(
 eventRouter.delete(
   "/leave", 
   validateRequest(joinAndLeaveEventSchema),
-  validateJoinOrLeaveEvent, async(req, res, next) => {
+  validateLeaveEvent, async(req, res, next) => {
     try {
-      const deleteRecord = await eventsController.leaveEvent(req.body);
-      res.send(deleteRecord);
+      const leaveTheEvent = await eventsController.leaveEvent(req.body);
+      res.send(leaveTheEvent);
     } catch (error) {
       next(error);
     }

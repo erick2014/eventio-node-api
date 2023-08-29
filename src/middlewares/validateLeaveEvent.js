@@ -1,6 +1,6 @@
 const { EventsAttendees } = require("../models/associations.js");
 
-async function validateJoinOrLeaveEvent(req, res, next) {
+async function validateLeaveEvent(req, res, next) {
   try {
     const { userId, eventId } = req.body;
   
@@ -8,10 +8,6 @@ async function validateJoinOrLeaveEvent(req, res, next) {
     
     if (recordData === null || !recordData) {
       const error = new Error("You aren't join to event");
-      error.statusCode = 404;
-      throw error
-    } else if (req.method == "POST" && recordData) {
-      const error = new Error("You are join to event");
       error.statusCode = 404;
       throw error
     }
@@ -29,4 +25,4 @@ async function validateJoinOrLeaveEvent(req, res, next) {
 } 
 
 
-module.exports = { validateJoinOrLeaveEvent }
+module.exports = { validateLeaveEvent }

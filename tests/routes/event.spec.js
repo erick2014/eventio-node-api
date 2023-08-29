@@ -21,6 +21,7 @@ describe("Event test", () => {
       email: "dilan123@gmail.com",
       password: "dilan",
     });
+
     const eventData = {
       title: "Inglés",
       description: "Learn Inglés",
@@ -37,7 +38,7 @@ describe("Event test", () => {
     await usersController.deleteAllUsers();
   });
 
-  it("Should return 200 and all events in the database", async () => {
+  it("GET / Should return 200 and all events in the database", async () => {
     const response = await request(app).get("/events/");
     expect(response.status).to.equal(200);
     expect(response.body).to.be.an("array");
@@ -55,7 +56,7 @@ describe("Event test", () => {
     expect(firstEvent).to.have.property("attendees");
   });
 
-  it("Should create an event ", async () => {
+  it("POST / Should create an event ", async () => {
     createdEvent = createdEvent.get({ plain: true });
 
     expect(createdEvent).to.have.property("id").and.not.be.null;
@@ -67,13 +68,13 @@ describe("Event test", () => {
     expect(createdEvent).to.have.property("owner_id");
   });
 
-  it("Should return an error if body is empty ", async () => {
+  it("POST / Should return an error if body is empty ", async () => {
     const response = await request(app).post("/events/").send();
     expect(response.status).to.equal(400);
     expect(response.body).to.deep.equal(mockedErrorParamsEmptyCreateEvent);
   });
 
-  it("Should return an error if body.title is empty", async () => {
+  it("POST / Should return an error if body.title is empty", async () => {
     const newEvent = {
       description: "learned about Python",
       event_date: "23/12/2024",
@@ -87,7 +88,7 @@ describe("Event test", () => {
     expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Title"));
   });
 
-  it("Should return an error if body.description is empty", async () => {
+  it("POST / Should return an error if body.description is empty", async () => {
     const newEvent = {
       title: "Python",
       event_date: "23/12/2024",
@@ -101,7 +102,7 @@ describe("Event test", () => {
     expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Description"));
   });
 
-  it("Should return an error if body.event_date is empty", async () => {
+  it("POST / Should return an error if body.event_date is empty", async () => {
     const newEvent = {
       title: "Python",
       description: "learned about Python",
@@ -115,7 +116,7 @@ describe("Event test", () => {
     expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Date"));
   });
 
-  it("Should return an error if body.event_time is empty", async () => {
+  it("POST / Should return an error if body.event_time is empty", async () => {
     const newEvent = {
       title: "Python",
       description: "learned about Python",
@@ -129,7 +130,7 @@ describe("Event test", () => {
     expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Time"));
   });
 
-  it("Should return an error if body.capacity is empty", async () => {
+  it("POST / Should return an error if body.capacity is empty", async () => {
     const newEvent = {
       title: "Python",
       description: "learned about Python",
@@ -143,7 +144,7 @@ describe("Event test", () => {
     expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Capacity"));
   });
 
-  it("Should return an error if body.userId is empty", async () => {
+  it("POST / Should return an error if body.userId is empty", async () => {
     const newEvent = {
       title: "Python",
       description: "learned about Python",
@@ -157,21 +158,22 @@ describe("Event test", () => {
     expect(response.body).to.deep.equal(mockedErrorParamsEmpty("User Id"));
   });
 
-  it("Should return 200 and return the event updated", async () => {
-    const eventId = createdEvent.id;
+  it("PUT Should return 200 and return the event updated", async () => {
     const eventUpdate = {
+      userId: createdEvent.owner_id,
       title: "Py",
       description: "learned about Py",
       event_date: "23/12/2024",
       event_time: "06:00PM",
       capacity: "12",
-      userId: createdEvent.owner_id,
     };
+    const eventId = createdEvent.id;
 
     const response = await request(app)
       .put(`/events/${eventId}`)
       .send(eventUpdate);
     expect(response.status).to.equal(200);
+    expect(typeof response.body).to.equal('object');
     expect(response.body.id).to.deep.equal(eventId);
     expect(response.body.title).to.deep.equal(eventUpdate.title);
     expect(response.body.description).to.deep.equal(eventUpdate.description);
@@ -194,7 +196,7 @@ describe("Event test", () => {
     expect(response.body).to.deep.equal({ error: "Event not found" });
   });
 
-  it("Should return 200 and find an event", async () => {
+  it("GET /event/:eventId Should return 200 and find an event", async () => {
     const eventId = createdEvent.id;
     const response = await request(app).get(`/events/event/${eventId}`);
     expect(response.status).to.equal(200);
@@ -210,14 +212,14 @@ describe("Event test", () => {
     expect(response.body).to.have.property("attendeesNames");
   });
 
-  it("GET /events/ Should return 404 and an error if event does not exist", async () => {
+  it("GET /events/:eventId Should return 404 and an error if event does not exist", async () => {
     const eventId = 10;
     const response = await request(app).get(`/events/event/${eventId}`);
     expect(response.status).to.equal(404);
     expect(response.body).to.deep.equal({ error: "Event not found" });
   });
 
-  it("Should return 200 and delete an event", async () => {
+  it("DELETE / Should return 200 and delete an event", async () => {
     const eventId = createdEvent.id;
 
     const response = await request(app)
@@ -229,18 +231,18 @@ describe("Event test", () => {
     });
   });
 
-/*   it.only("DELETE /events/ Should return 404 and an error if user isn`t owner event`s ", async () => {
+  it("DELETE /events/ Should return 404 and an error if user isn`t owner event`s ", async () => {
     const eventId = createdEvent.id;
 
     const response = await request(app)
       .delete(`/events/${eventId}`)
       .send({ userId: 10 });
-    console.log("respuesta del delete", response.body);
+
     expect(response.status).to.equal(404);
     expect(response.body).to.deep.equal({
-      error: "Sorry but user isn`t owner event`s ",
+      error: "Event not found",
     });
-  }); */
+  }); 
 
   it("DELETE /events/ Should return 404 and an error if event does not exist", async () => {
     const eventId = 10;
@@ -250,4 +252,110 @@ describe("Event test", () => {
     expect(response.status).to.equal(404);
     expect(response.body).to.deep.equal({ error: "Event not found" });
   });
+
+  it("POST /events/join Should return 200 and success: true if an user joined an event", async () => {
+    const user2 = await usersController.createUser({
+      firstName: "Emma",
+      lastName: "González",
+      email: "emma@gmail.com",
+      password: "dilan123",
+    });
+
+    const eventId = createdEvent.id;
+    const dataToReques = { userId : user2.id, eventId }
+    const response = await request(app).post("/events/join").send(dataToReques)
+    expect(response.status).to.equal(200);
+    expect(response.body).to.deep.equal({
+      success: true,
+    });
+  })
+
+  it("POST /events/join Should return 404 and error if the user already joined the event", async () => {
+    const eventId = createdEvent.id;
+    const userId = createdEvent.owner_id
+    const dataToReques = { userId, eventId }
+
+    const response = await request(app).post("/events/join").send(dataToReques)
+    expect(response.status).to.equal(404);
+    expect(response.body).to.deep.equal({error: "You are join to event"});
+  })
+
+  it("POST /events/join Should return 400 and error if body.eventId param is empty", async () => {
+    const userId = createdEvent.owner_id
+    const dataToReques = { userId }
+
+    const response = await request(app).post("/events/join").send(dataToReques)
+    expect(response.status).to.equal(400);
+    expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Event Id"));
+  })
+
+  it("POST /events/join Should return 400 and error if body.userId param is empty", async () => {
+    const eventId = createdEvent.id;
+    const dataToReques = { eventId }
+
+    const response = await request(app).post("/events/join").send(dataToReques)
+    expect(response.status).to.equal(400);
+    expect(response.body).to.deep.equal(mockedErrorParamsEmpty("User Id"));
+  })
+
+ it("DELETE /events/leave Should return 200 and success: true if an user leaved of an event", async () => {
+    const user2 = await usersController.createUser({
+      firstName: "Emma",
+      lastName: "González",
+      email: "emma2@gmail.com",
+      password: "dilan123",
+    });
+
+    const eventId = createdEvent.id;
+    const userId = user2.id
+    await eventsController.joinEvent(eventId, userId, false)
+
+    const dataToReques = { userId, eventId }
+    const response = await request(app).delete("/events/leave").send(dataToReques)
+    expect(response.status).to.equal(200);
+    expect(response.body).to.deep.equal({
+      success: true,
+    });
+  }) 
+
+  it("DELETE /events/leave Should return 404 and error if body.eventId param is empty", async () => {
+    const userId = createdEvent.owner_id;
+    const dataToReques = { userId }
+    const response = await request(app).delete("/events/leave").send(dataToReques)
+    expect(response.status).to.equal(400);
+    expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Event Id"));
+  })
+
+  it("DELETE /events/leave Should return 404 and error if body.userId param is empty", async () => {
+    const eventId = createdEvent.id;
+    const dataToReques = { eventId }
+    const response = await request(app).delete("/events/leave").send(dataToReques)
+    expect(response.status).to.equal(400);
+    expect(response.body).to.deep.equal(mockedErrorParamsEmpty("User Id"));
+  })
+
+it("DELETE /events/leave Should return 404 and error if the user aren't join to event", async () => {
+    const user2 = await usersController.createUser({
+      firstName: "Emma",
+      lastName: "González",
+      email: "emma3@gmail.com",
+      password: "dilan123",
+    });
+
+    const userId = user2.id
+    const eventId = createdEvent.id;
+    const dataToReques = { userId, eventId }
+    const response = await request(app).delete("/events/leave").send(dataToReques)
+    expect(response.status).to.equal(404);
+    expect(response.body).to.deep.equal({error: "You aren't join to event"});
+  }) 
+
+  it("DELETE /events/leave Should return 404 and error if the user is event owner", async () => {
+    const userId = createdEvent.owner_id
+    const eventId = createdEvent.id;
+    const dataToReques = { userId, eventId }
+    const response = await request(app).delete("/events/leave").send(dataToReques)
+    expect(response.status).to.equal(404);
+    expect(response.body).to.deep.equal({error: "You are event owner"});
+  })
 });

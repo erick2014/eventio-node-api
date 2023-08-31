@@ -7,8 +7,8 @@ async function validateJoinEvent(req, res, next) {
     let result = await EventsAttendees.findOne({ where : {event_id: eventId, user_id: userId}})
     
     if (result) {
-      const error = new Error("You are join to event");
-      error.statusCode = 404;
+      const error = new Error("You are already join to this event");
+      error.statusCode = 400;
       throw error
     }
     

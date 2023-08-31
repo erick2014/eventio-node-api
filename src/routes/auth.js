@@ -15,13 +15,7 @@ userRouter.post(
   validateRequest(createUserSchema),
   async (req, res, next) => {
     try {
-      const { firstName, lastName, email, password } = req.body;
-      const newUser = await userController.createUser({
-        firstName,
-        lastName,
-        email,
-        password,
-      });
+      const newUser = await userController.createUser(req.body);
       res.json(newUser);
     } catch (error) {
       next(error);
@@ -33,10 +27,9 @@ userRouter.post(
   "/login",
   validateRequest(loginUserSchema),
   async (req, res, next) => {
-    const { email, password } = req.body;
 
     try {
-      const userFound = await userController.loginUser({ email, password });
+      const userFound = await userController.loginUser(req.body);
 
       res.json(userFound);
     } catch (error) {

@@ -1,6 +1,6 @@
+
 const app = require("../../app.js");
 const request = require("supertest");
-const sinon = require("sinon");
 const expect = require("chai").expect;
 const EventsController = require("../../src/controllers/eventController.js");
 const eventsController = new EventsController();
@@ -276,8 +276,8 @@ describe("Event test", () => {
     const dataToReques = { userId, eventId }
 
     const response = await request(app).post("/events/join").send(dataToReques)
-    expect(response.status).to.equal(404);
-    expect(response.body).to.deep.equal({error: "You are join to event"});
+    expect(response.status).to.equal(400);
+    expect(response.body).to.deep.equal({error: "You are already join to this event"});
   })
 
   it("POST /events/join Should return 400 and error if body.eventId param is empty", async () => {
@@ -308,10 +308,12 @@ describe("Event test", () => {
 
     const eventId = createdEvent.id;
     const userId = user2.id
-    await eventsController.joinEvent(eventId, userId, false)
+    const resultado = await eventsController.joinEvent(eventId, userId, false)
+    console.log("resultado", resultado)
 
     const dataToReques = { userId, eventId }
     const response = await request(app).delete("/events/leave").send(dataToReques)
+    console.log("response.body", response.body)
     expect(response.status).to.equal(200);
     expect(response.body).to.deep.equal({
       success: true,
@@ -356,6 +358,6 @@ it("DELETE /events/leave Should return 404 and error if the user aren't join to 
     const dataToReques = { userId, eventId }
     const response = await request(app).delete("/events/leave").send(dataToReques)
     expect(response.status).to.equal(404);
-    expect(response.body).to.deep.equal({error: "You are event owner"});
+    expect(response.body).to.deep.equal({error: "You are the owner of this event"});
   })
 });

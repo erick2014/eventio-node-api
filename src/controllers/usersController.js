@@ -29,14 +29,15 @@ class UsersController {
     return user;
   }
 
-  async loginUser({ email, password }) {
+  async loginUser(userData) {
+    const { email, password } = userData
     const userLogin = await Users.findOne({
       where: { email: email },
       raw: true,
     });
 
     if (userLogin == null) {
-      const error = new Error("User does not exist");
+      const error = new Error("This account is not registered");
       error.statusCode = 401;
       throw error;
     }

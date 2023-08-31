@@ -1,6 +1,6 @@
 const { Events } = require("../models/associations.js");
 
-async function findUserIsOwnerEvent(req, res, next) {
+async function validateIsEventOwner(req, res, next) {
   try {
     const { userId } = req.body
     const eventId = parseInt(req.params.id);
@@ -28,4 +28,4 @@ async function findUserIsOwnerEvent(req, res, next) {
 
 }
 
-module.exports = { findUserIsOwnerEvent }
+module.exports = { validateIsEventOwner }

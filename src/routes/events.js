@@ -1,7 +1,7 @@
 const { Router } = require("express");
 const { validateRequest } = require("../middlewares/validateData.js");
 const { eventSchema, joinAndLeaveEventSchema, eventEditSchema } = require("./schemas/events.js");
-const { findUserIsOwnerEvent } = require("../middlewares/validateIsOwner.js")
+const { validateIsEventOwner } = require("../middlewares/validateIsOwner.js")
 const  { validateLeaveEvent } = require("../middlewares/validateLeaveEvent.js")
 const { validateJoinEvent } = require("../middlewares/validateJoinEvent.js")
 
@@ -66,7 +66,7 @@ eventRouter.post(
   }
 );
 
-//leave of an event
+//leave an event
 eventRouter.delete(
   "/leave", 
   validateRequest(joinAndLeaveEventSchema),
@@ -98,7 +98,7 @@ eventRouter.post("/", validateRequest(eventSchema), async (req, res, next) => {
 eventRouter.put(
   "/:id",
   validateRequest(eventEditSchema),
-  findUserIsOwnerEvent,
+  validateIsEventOwner,
   async (req, res, next) => {
     const eventId = parseInt(req.params.id);
     try {
@@ -114,7 +114,7 @@ eventRouter.put(
 );
 
 //delete an event
-eventRouter.delete("/:id", findUserIsOwnerEvent, async (req, res, next) => {
+eventRouter.delete("/:id", validateIsEventOwner, async (req, res, next) => {
   const eventId = parseInt(req.params.id);
 
   try {

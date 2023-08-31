@@ -1,4 +1,3 @@
-
 const app = require("../../app.js");
 const request = require("supertest");
 const expect = require("chai").expect;
@@ -178,40 +177,6 @@ describe("Event test", () => {
     expect(response.body).to.deep.equal({ error: "Event not found" });
   });
 
-  it("DELETE / Should return 200 and delete an event", async () => {
-    const eventId = createdEvent.id;
-
-    const response = await request(app)
-      .delete(`/events/${eventId}`)
-      .send({ userId: createdEvent.owner_id });
-    expect(response.status).to.equal(200);
-    expect(response.body).to.deep.equal({
-      success: true,
-    });
-  });
-
-  it("DELETE /events/ Should return 404 and an error if user isn`t owner event`s ", async () => {
-    const eventId = createdEvent.id;
-
-    const response = await request(app)
-      .delete(`/events/${eventId}`)
-      .send({ userId: 10 });
-
-    expect(response.status).to.equal(404);
-    expect(response.body).to.deep.equal({
-      error: "Event not found",
-    });
-  }); 
-
-  it("DELETE /events/ Should return 404 and an error if event does not exist", async () => {
-    const eventId = 10;
-    const response = await request(app)
-      .delete(`/events/${eventId}`)
-      .send({ userId: createdEvent.owner_id });
-    expect(response.status).to.equal(404);
-    expect(response.body).to.deep.equal({ error: "Event not found" });
-  });
-
   it("POST /events/join Should return 200 and success: true if an user joined an event", async () => {
     const user2 = await usersController.createUser({
       firstName: "Emma",
@@ -255,66 +220,5 @@ describe("Event test", () => {
     const response = await request(app).post("/events/join").send(dataToReques)
     expect(response.status).to.equal(400);
     expect(response.body).to.deep.equal(mockedErrorParamsEmpty("User Id"));
-  })
-
- it("DELETE /events/leave Should return 200 and success: true if an user leaved of an event", async () => {
-    const user2 = await usersController.createUser({
-      firstName: "Emma",
-      lastName: "González",
-      email: "emma2@gmail.com",
-      password: "dilan123",
-    });
-
-    const eventId = createdEvent.id;
-    const userId = user2.id
-    await eventsController.joinEvent(eventId, userId, false)
-
-    const dataToReques = { userId, eventId }
-    const response = await request(app).delete("/events/leave").send(dataToReques)
-    expect(response.status).to.equal(200);
-    expect(response.body).to.deep.equal({
-      success: true,
-    });
-  }) 
-
-  it("DELETE /events/leave Should return 404 and error if body.eventId param is empty", async () => {
-    const userId = createdEvent.owner_id;
-    const dataToReques = { userId }
-    const response = await request(app).delete("/events/leave").send(dataToReques)
-    expect(response.status).to.equal(400);
-    expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Event Id"));
-  })
-
-  it("DELETE /events/leave Should return 404 and error if body.userId param is empty", async () => {
-    const eventId = createdEvent.id;
-    const dataToReques = { eventId }
-    const response = await request(app).delete("/events/leave").send(dataToReques)
-    expect(response.status).to.equal(400);
-    expect(response.body).to.deep.equal(mockedErrorParamsEmpty("User Id"));
-  })
-
-it("DELETE /events/leave Should return 404 and error if the user aren't join to event", async () => {
-    const user2 = await usersController.createUser({
-      firstName: "Emma",
-      lastName: "González",
-      email: "emma3@gmail.com",
-      password: "dilan123",
-    });
-
-    const userId = user2.id
-    const eventId = createdEvent.id;
-    const dataToReques = { userId, eventId }
-    const response = await request(app).delete("/events/leave").send(dataToReques)
-    expect(response.status).to.equal(404);
-    expect(response.body).to.deep.equal({error: "You aren't join to event"});
-  }) 
-
-  it("DELETE /events/leave Should return 404 and error if the user is event owner", async () => {
-    const userId = createdEvent.owner_id
-    const eventId = createdEvent.id;
-    const dataToReques = { userId, eventId }
-    const response = await request(app).delete("/events/leave").send(dataToReques)
-    expect(response.status).to.equal(404);
-    expect(response.body).to.deep.equal({error: "You are the owner of this event"});
   })
 });

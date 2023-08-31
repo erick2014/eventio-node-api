@@ -5,7 +5,6 @@ async function validateLeaveEvent(req, res, next) {
     const { userId, eventId } = req.body;
   
     let recordData = await EventsAttendees.findOne({ where : {event_id: eventId, user_id: userId}})
-    console.log("recordData", recordData)
     
     if (!recordData) {
       const error = new Error("You aren't join to event");

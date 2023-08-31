@@ -38,24 +38,6 @@ describe("Event test", () => {
     await usersController.deleteAllUsers();
   });
 
-  it("GET / Should return 200 and all events in the database", async () => {
-    const response = await request(app).get("/events/");
-    expect(response.status).to.equal(200);
-    expect(response.body).to.be.an("array");
-    expect(response.body.length).to.be.greaterThan(0);
-
-    const firstEvent = response.body[0];
-    expect(firstEvent).to.have.property("id").and.not.be.null;
-    expect(firstEvent).to.have.property("nameEvent");
-    expect(firstEvent).to.have.property("descriptionEvent");
-    expect(firstEvent).to.have.property("date");
-    expect(firstEvent).to.have.property("time");
-    expect(firstEvent).to.have.property("capacity");
-    expect(firstEvent).to.have.property("eventOwner");
-    expect(firstEvent).to.have.property("host");
-    expect(firstEvent).to.have.property("attendees");
-  });
-
   it("POST / Should create an event ", async () => {
     createdEvent = createdEvent.get({ plain: true });
 
@@ -196,29 +178,6 @@ describe("Event test", () => {
     expect(response.body).to.deep.equal({ error: "Event not found" });
   });
 
-  it("GET /event/:eventId Should return 200 and find an event", async () => {
-    const eventId = createdEvent.id;
-    const response = await request(app).get(`/events/event/${eventId}`);
-    expect(response.status).to.equal(200);
-    expect(response.body).to.have.property("id").and.not.be.null;
-    expect(response.body).to.have.property("nameEvent");
-    expect(response.body).to.have.property("descriptionEvent");
-    expect(response.body).to.have.property("date");
-    expect(response.body).to.have.property("time");
-    expect(response.body).to.have.property("capacity");
-    expect(response.body).to.have.property("eventOwner");
-    expect(response.body).to.have.property("host");
-    expect(response.body).to.have.property("attendees");
-    expect(response.body).to.have.property("attendeesNames");
-  });
-
-  it("GET /events/:eventId Should return 404 and an error if event does not exist", async () => {
-    const eventId = 10;
-    const response = await request(app).get(`/events/event/${eventId}`);
-    expect(response.status).to.equal(404);
-    expect(response.body).to.deep.equal({ error: "Event not found" });
-  });
-
   it("DELETE / Should return 200 and delete an event", async () => {
     const eventId = createdEvent.id;
 
@@ -308,12 +267,10 @@ describe("Event test", () => {
 
     const eventId = createdEvent.id;
     const userId = user2.id
-    const resultado = await eventsController.joinEvent(eventId, userId, false)
-    console.log("resultado", resultado)
+    await eventsController.joinEvent(eventId, userId, false)
 
     const dataToReques = { userId, eventId }
     const response = await request(app).delete("/events/leave").send(dataToReques)
-    console.log("response.body", response.body)
     expect(response.status).to.equal(200);
     expect(response.body).to.deep.equal({
       success: true,

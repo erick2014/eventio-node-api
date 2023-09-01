@@ -82,8 +82,8 @@ describe("Event test", () => {
     const userId = user2.id
     await eventsController.joinEvent(eventId, userId, false)
 
-    const dataToReques = { userId, eventId }
-    const response = await request(app).delete("/events/leave").send(dataToReques)
+    const dataToRequest = { userId, eventId }
+    const response = await request(app).delete("/events/leave").send(dataToRequest)
     expect(response.status).to.equal(200);
     expect(response.body).to.deep.equal({
       success: true,
@@ -92,16 +92,16 @@ describe("Event test", () => {
 
   it("DELETE /events/leave Should return 404 and error if body.eventId param is empty", async () => {
     const userId = createdEvent.owner_id;
-    const dataToReques = { userId }
-    const response = await request(app).delete("/events/leave").send(dataToReques)
+    const dataToRequest = { userId }
+    const response = await request(app).delete("/events/leave").send(dataToRequest)
     expect(response.status).to.equal(400);
     expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Event Id"));
   })
 
   it("DELETE /events/leave Should return 404 and error if body.userId param is empty", async () => {
     const eventId = createdEvent.id;
-    const dataToReques = { eventId }
-    const response = await request(app).delete("/events/leave").send(dataToReques)
+    const dataToRequest = { eventId }
+    const response = await request(app).delete("/events/leave").send(dataToRequest)
     expect(response.status).to.equal(400);
     expect(response.body).to.deep.equal(mockedErrorParamsEmpty("User Id"));
   })
@@ -116,8 +116,8 @@ describe("Event test", () => {
 
     const userId = user2.id
     const eventId = createdEvent.id;
-    const dataToReques = { userId, eventId }
-    const response = await request(app).delete("/events/leave").send(dataToReques)
+    const dataToRequest = { userId, eventId }
+    const response = await request(app).delete("/events/leave").send(dataToRequest)
     expect(response.status).to.equal(404);
     expect(response.body).to.deep.equal({error: "You aren't join to event"});
   }) 
@@ -125,8 +125,8 @@ describe("Event test", () => {
   it("DELETE /events/leave Should return 404 and error if the user is event owner", async () => {
     const userId = createdEvent.owner_id
     const eventId = createdEvent.id;
-    const dataToReques = { userId, eventId }
-    const response = await request(app).delete("/events/leave").send(dataToReques)
+    const dataToRequest = { userId, eventId }
+    const response = await request(app).delete("/events/leave").send(dataToRequest)
     expect(response.status).to.equal(404);
     expect(response.body).to.deep.equal({error: "You are the owner of this event"});
   })

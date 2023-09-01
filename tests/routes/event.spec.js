@@ -186,8 +186,8 @@ describe("Event test", () => {
     });
 
     const eventId = createdEvent.id;
-    const dataToReques = { userId : user2.id, eventId }
-    const response = await request(app).post("/events/join").send(dataToReques)
+    const dataToRequest = { userId : user2.id, eventId }
+    const response = await request(app).post("/events/join").send(dataToRequest)
     expect(response.status).to.equal(200);
     expect(response.body).to.deep.equal({
       success: true,
@@ -197,27 +197,27 @@ describe("Event test", () => {
   it("POST /events/join Should return 404 and error if the user already joined the event", async () => {
     const eventId = createdEvent.id;
     const userId = createdEvent.owner_id
-    const dataToReques = { userId, eventId }
+    const dataToRequest = { userId, eventId }
 
-    const response = await request(app).post("/events/join").send(dataToReques)
+    const response = await request(app).post("/events/join").send(dataToRequest)
     expect(response.status).to.equal(400);
     expect(response.body).to.deep.equal({error: "You are already join to this event"});
   })
 
   it("POST /events/join Should return 400 and error if body.eventId param is empty", async () => {
     const userId = createdEvent.owner_id
-    const dataToReques = { userId }
+    const dataToRequest = { userId }
 
-    const response = await request(app).post("/events/join").send(dataToReques)
+    const response = await request(app).post("/events/join").send(dataToRequest)
     expect(response.status).to.equal(400);
     expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Event Id"));
   })
 
   it("POST /events/join Should return 400 and error if body.userId param is empty", async () => {
     const eventId = createdEvent.id;
-    const dataToReques = { eventId }
+    const dataToRequest = { eventId }
 
-    const response = await request(app).post("/events/join").send(dataToReques)
+    const response = await request(app).post("/events/join").send(dataToRequest)
     expect(response.status).to.equal(400);
     expect(response.body).to.deep.equal(mockedErrorParamsEmpty("User Id"));
   })

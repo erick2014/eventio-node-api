@@ -9,7 +9,7 @@ async function validateIsEventOwner(req, res, next) {
       where: { id: eventId },
     });
   
-    if (event === null || !event) {
+    if (!event) {
       const error = new Error("Event not found");
       error.statusCode = 404;
       throw error

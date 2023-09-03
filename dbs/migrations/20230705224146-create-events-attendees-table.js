@@ -28,8 +28,9 @@ module.exports = {
         references: {
           model: 'events',
           key: 'id',
-          onDelete: 'CASCADE', 
         },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
       },
       user_id: {
         type: DataTypes.INTEGER,
@@ -37,8 +38,9 @@ module.exports = {
         references: {
           model: 'users', 
           key: 'id',
-          onDelete: 'CASCADE',
         },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
       },
       createdAt: {
         type: DataTypes.DATE,

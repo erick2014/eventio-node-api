@@ -20,8 +20,9 @@ const schemaEventsAttendees = {
     references: {
       model: 'events', 
       key: 'id',
-      onDelete: 'CASCADE',
     },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   },
   user_id: {
     type: DataTypes.INTEGER,
@@ -29,17 +30,16 @@ const schemaEventsAttendees = {
     references: {
       model: 'users',
       key: 'id',
-      onDelete: 'CASCADE',
     },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   },
   createdAt: {
     type: DataTypes.DATE,
-    /* allowNull: false, */
     defaultValue: DataTypes.NOW,
   },
   updatedAt: {
     type: DataTypes.DATE,
-    /* allowNull: false, */
     defaultValue: DataTypes.NOW,
   },
 };

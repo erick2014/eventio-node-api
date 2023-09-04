@@ -35,12 +35,18 @@ describe("Event test", () => {
   });
 
   it("GET / Should return 200 and all events in the database", async () => {
-    const response = await request(app).get("/events/");
+    const pageNumber =  0
+    const itemsPerPage = 6  
+    const response = await request(app).get(`/events/${pageNumber}/${itemsPerPage}`);
+    const events = response.body.eventsList
+    const lengthEvents = response.body.lengthEvents
     expect(response.status).to.equal(200);
-    expect(response.body).to.be.an("array");
-    expect(response.body.length).to.be.greaterThan(0);
+    expect(events).to.be.an("array");
+    expect(events.length).to.be.greaterThan(0);
+    expect(lengthEvents).to.be.an("number");
+    expect(lengthEvents).to.deep.equal(events.length)
 
-    const firstEvent = response.body[0];
+    const firstEvent = events[0];
     expect(firstEvent).to.have.property("id").and.not.be.null;
     expect(firstEvent).to.have.property("nameEvent");
     expect(firstEvent).to.have.property("descriptionEvent");

@@ -23,9 +23,9 @@ eventRouter.get("/event/:eventId", async (req, res, next) => {
 });
 
 //get all events
-eventRouter.get("/", async (_, res, next) => {
+eventRouter.get("/:pageNumber/:itemsPerPage", async (req, res, next) => {
   try {
-    const events = await eventsController.getAllEvents();
+    const events = await eventsController.getAllEvents(req.params);
     res.json(events);
   } catch (error) {
     next(error);

@@ -33,10 +33,9 @@ eventRouter.get("/:pageNumber/:itemsPerPage", async (req, res, next) => {
 });
 
 //get all user´s events
-eventRouter.get("/user/:userId", async (req, res, next) => {
-  const userId = req.params.userId;
+eventRouter.get("/user/:userId/:pageNumber/:itemsPerPage", async (req, res, next) => {
   try {
-    const userEvents = await eventsController.getUserEvents(userId);
+    const userEvents = await eventsController.getUserEvents(req.params);
 
     res.json(userEvents);
   } catch (error) {

@@ -7,12 +7,14 @@ class EventsController {
     const eventData = eventDetail.event;
     const dataOwnerEvent = eventDetail.user;
     const hostEvent = `${dataOwnerEvent.firstName} ${dataOwnerEvent.lastName}`;
-    const attendeesIdUser = eventDetail.attendeesId.split(",");
+    const attendeesIdUser = eventDetail.attendeesId.split(",").map(idUser => {
+      return idUser * 1
+    }); // Converts the ids into numbers, since they arrive as a string from the query
     let attendeesNames
 
     if(eventDetail.attendees){
-      attendeesNames = eventDetail.attendees.split(",");
-    }
+      attendeesNames = eventDetail.attendees
+    } 
 
     const event = {
       id: eventData.id,
@@ -30,8 +32,18 @@ class EventsController {
     return event
   }
 
-  async getUserEvents(userId) {
+  async getUserEvents(dataParams) {
+    let  { pageNumber, itemsPerPage, userId } = dataParams
+    pageNumber = parseInt(pageNumber)
+    itemsPerPage = parseInt(itemsPerPage)
+
+    const currentPage = pageNumber + 1
+    const offset = (currentPage - 1) * itemsPerPage;
+    const lengthEventsUser = await EventsAttendees.count({ where: { user_id: userId } })
+
     const eventsUser = await EventsAttendees.findAll({
+      limit: itemsPerPage,
+      offset: offset,
       group: "event_id", // Group by event_id from the EventsAttendees table
       having: where(fn("FIND_IN_SET", userId, col("attendeesId")), ">", 0),
       attributes: [
@@ -61,7 +73,7 @@ class EventsController {
       return this.buildEventData(element)
     });
 
-    return eventsList;
+    return { eventsList, lengthEventsUser };
   }
 
   async getAllEvents(data) {

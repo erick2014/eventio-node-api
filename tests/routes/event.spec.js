@@ -194,6 +194,33 @@ describe("Event test", () => {
     });
   })
 
+  it("POST /events/join Should return 404 and error if capacity is full", async () => {
+    const eventData = {
+      title: "Python",
+      description: "Learn Python",
+      event_date: "25/01/1994",
+      event_time: "20:00PM",
+      capacity: 1,
+      userId: createdEvent.owner_id,
+    };
+    const event = await eventsController.create(eventData);
+    const eventId = event.id;
+
+    const user2 = await usersController.createUser({
+      firstName: "Emma",
+      lastName: "González",
+      email: "emmaIsabella@gmail.com",
+      password: "dilan123",
+    });
+
+    const dataToRequest = { userId : user2.id, eventId }
+    const response = await request(app).post("/events/join").send(dataToRequest)
+    expect(response.status).to.equal(404);
+    expect(response.body).to.deep.equal({
+      error: "You cannot join the event, the capacity is full.",
+    });
+  })
+
   it("POST /events/join Should return 404 and error if the user already joined the event", async () => {
     const eventId = createdEvent.id;
     const userId = createdEvent.owner_id

@@ -68,6 +68,22 @@ describe("Event test", () => {
     expect(response.status).to.equal(400);
     expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Title"));
   });
+  
+  it("POST / Should return an error if user not exist", async () => {
+    const newEvent = {
+      title: "Python",
+      description: "Learn Inglés",
+      event_date: "23/12/2024",
+      event_time: "06:00PM",
+      capacity: "12",
+      userId: 15,
+    };
+
+    const response = await request(app).post("/events/").send(newEvent);
+
+    expect(response.status).to.equal(404);
+    expect(response.body).to.deep.equal({ error: "User not found" });
+  });
 
   it("POST / Should return an error if body.description is empty", async () => {
     const newEvent = {
@@ -218,6 +234,22 @@ describe("Event test", () => {
     expect(response.status).to.equal(404);
     expect(response.body).to.deep.equal({
       error: "You cannot join the event, the capacity is full.",
+    });
+  })
+
+  it("POST /events/join Should return if event not exist", async () => {
+    const user2 = await usersController.createUser({
+      firstName: "Emma",
+      lastName: "González",
+      email: "emmaIsabella3@gmail.com",
+      password: "dilan123",
+    });
+
+    const dataToRequest = { userId : user2.id, eventId : 13}
+    const response = await request(app).post("/events/join").send(dataToRequest)
+    expect(response.status).to.equal(404);
+    expect(response.body).to.deep.equal({
+      error: "Event not found",
     });
   })
 

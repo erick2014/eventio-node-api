@@ -69,8 +69,6 @@ class EventsController {
 
   async getAllEvents(data) {
     let  { pageNumber, itemsPerPage } = data
-    pageNumber = parseInt(pageNumber)
-    itemsPerPage = parseInt(itemsPerPage)
 
     const currentPage = pageNumber + 1
     const offset = (currentPage - 1) * itemsPerPage;

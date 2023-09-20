@@ -4,6 +4,8 @@ const { eventSchema, joinAndLeaveEventSchema, eventEditSchema } = require("./sch
 const { validateIsEventOwner } = require("../middlewares/validateIsOwner.js")
 const  { validateLeaveEvent } = require("../middlewares/validateLeaveEvent.js")
 const { validateJoinEvent } = require("../middlewares/validateJoinEvent.js")
+const { validateIfUserExist } = require("../middlewares/validateUser.js")
+const { selectValidationSchema } = require("../middlewares/validatePaginationData.js")
 
 const EventsController = require("../controllers/eventController.js");
 const eventRouter = Router();
@@ -22,22 +24,20 @@ eventRouter.get("/event/:eventId", async (req, res, next) => {
   }
 });
 
-//get all events
-eventRouter.get("/:pageNumber/:itemsPerPage", async (req, res, next) => {
-  try {
-    const events = await eventsController.getAllEvents(req.params);
-    res.json(events);
-  } catch (error) {
-    next(error);
-  }
-});
-
 //get all user´s events
-eventRouter.get("/user/:userId/:pageNumber/:itemsPerPage", async (req, res, next) => {
+eventRouter.get("/pagination", 
+selectValidationSchema, 
+async (req, res, next) => {
   try {
-    const userEvents = await eventsController.getUserEvents(req.params);
+    let events = []
 
-    res.json(userEvents);
+    if (!req.query.userId){
+      events = await eventsController.getAllEvents(req.query);
+    } else {
+      events = await eventsController.getUserEvents(req.query);
+    }
+
+    res.json(events);
   } catch (error) {
     next(error);
   }
@@ -47,8 +47,9 @@ eventRouter.get("/user/:userId/:pageNumber/:itemsPerPage", async (req, res, next
 eventRouter.post(
   "/join",
   validateRequest(joinAndLeaveEventSchema),
+  validateIfUserExist,
   validateJoinEvent,
-  async (req, res, next) => {
+  async (req, res, next) => {  
     const { userId, eventId } = req.body;
 
     try {
@@ -80,7 +81,9 @@ eventRouter.delete(
 )
 
 //Create an event
-eventRouter.post("/", validateRequest(eventSchema), async (req, res, next) => {
+eventRouter.post("/", validateRequest(eventSchema), 
+validateIfUserExist, 
+async (req, res, next) => {
 
   try {
     const newEvent = await eventsController.create(
@@ -113,7 +116,8 @@ eventRouter.put(
 );
 
 //delete an event
-eventRouter.delete("/:id", validateIsEventOwner, async (req, res, next) => {
+eventRouter.delete("/:id", 
+validateIsEventOwner, async (req, res, next) => {
   const eventId = parseInt(req.params.id);
 
   try {

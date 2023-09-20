@@ -18,11 +18,18 @@ async function validateJoinEvent(req, res, next) {
       ],
       where : { id: eventId }
     })
+
+    if(!event){
+      const error = new Error("Event not found");
+      error.statusCode = 404;
+      throw error
+    }
+
     event = event.get({ plain: true });
 
     let quantityAttendees = await EventsAttendees.count({ where: { event_id: eventId } })
 
-    if(Number(event.capacity)=== quantityAttendees){
+    if(Number(event.capacity) === quantityAttendees){
       const error = new Error("You cannot join the event, the capacity is full.");
       error.statusCode = 404;
       throw error

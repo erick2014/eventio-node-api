@@ -7,14 +7,7 @@ class EventsController {
     const eventData = eventDetail.event;
     const dataOwnerEvent = eventDetail.user;
     const hostEvent = `${dataOwnerEvent.firstName} ${dataOwnerEvent.lastName}`;
-    const attendeesIdUser = eventDetail.attendeesId.split(",").map(idUser => {
-      return idUser * 1
-    }); // Converts the ids into numbers, since they arrive as a string from the query
-    let attendeesNames
-
-    if(eventDetail.attendees){
-      attendeesNames = eventDetail.attendees
-    } 
+    const attendeesIdUser = eventDetail.attendeesId
 
     const event = {
       id: eventData.id,
@@ -26,7 +19,7 @@ class EventsController {
       eventOwner: eventData.owner_id,
       host: hostEvent,
       attendees: attendeesIdUser,
-      ...(attendeesNames && {attendeesNames}),
+      ...(eventDetail.attendees && { attendeesNames : eventDetail.attendees}),
     };
 
     return event
@@ -34,8 +27,6 @@ class EventsController {
 
   async getUserEvents(dataParams) {
     let  { pageNumber, itemsPerPage, userId } = dataParams
-    pageNumber = parseInt(pageNumber)
-    itemsPerPage = parseInt(itemsPerPage)
 
     const currentPage = pageNumber + 1
     const offset = (currentPage - 1) * itemsPerPage;
@@ -86,36 +77,38 @@ class EventsController {
     const lengthEvents = await Events.count()
     let eventsList = []
 
-    if(lengthEvents){
-      const allEvents = await EventsAttendees.findAll({
-        limit: itemsPerPage,
-        offset: offset,
-        group: "event_id",
-        attributes: [[fn("GROUP_CONCAT", col("user_id")), "attendeesId"]],
-        include: [
-          {
-            model: Events,
-            attributes: [
-              "id",
-              "title",
-              "description",
-              "event_date",
-              "event_time",
-              "capacity",
-              "owner_id",
-            ],
-          },
-          {
-            model: Users,
-            attributes: ["id", "firstName", "lastName"],
-          },
-        ],
-      });
-  
-      eventsList = allEvents.map((element) => {
-        return this.buildEventData(element)  
-      });
+    if(!lengthEvents){
+      return { eventsList, lengthEvents: 0 };
     }
+
+    const allEvents = await EventsAttendees.findAll({
+      limit: itemsPerPage,
+      offset: offset,
+      group: "event_id",
+      attributes: [[fn("GROUP_CONCAT", col("user_id")), "attendeesId"]],
+      include: [
+        {
+          model: Events,
+          attributes: [
+            "id",
+            "title",
+            "description",
+            "event_date",
+            "event_time",
+            "capacity",
+            "owner_id",
+          ],
+        },
+        {
+          model: Users,
+          attributes: ["id", "firstName", "lastName"],
+        },
+      ],
+    });
+
+    eventsList = allEvents.map((element) => {
+      return this.buildEventData(element)  
+    });
 
     return {eventsList, lengthEvents};
   }

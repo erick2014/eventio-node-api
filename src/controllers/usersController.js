@@ -36,7 +36,7 @@ class UsersController {
       raw: true,
     });
 
-    if (userLogin == null) {
+    if (!userLogin) {
       const error = new Error("This account is not registered");
       error.statusCode = 401;
       throw error;

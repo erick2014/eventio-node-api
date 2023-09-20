@@ -24,17 +24,17 @@ eventRouter.get("/event/:eventId", async (req, res, next) => {
   }
 });
 
-//get all user´s events
+//get all events
 eventRouter.get("/pagination", 
 selectValidationSchema, 
 async (req, res, next) => {
   try {
     let events = []
 
-    if (!req.query.userId){
-      events = await eventsController.getAllEvents(req.query);
-    } else {
+    if (req.query.userId){
       events = await eventsController.getUserEvents(req.query);
+    } else {
+      events = await eventsController.getAllEvents(req.query);
     }
 
     res.json(events);

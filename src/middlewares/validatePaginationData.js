@@ -9,10 +9,10 @@ function selectValidationSchema(req, res, next) {
   req.query.itemsPerPage = Number(req.query.itemsPerPage)
 
 
-  if (!req.query.userId) {
-    validateRequest(getAllEventsSchema, "query")(req, res, next);
-  } else {
+  if (req.query.userId) {
     validateRequest(getAllUserEventsSchema, "query")(req, res, next);
+  } else {
+    validateRequest(getAllEventsSchema, "query")(req, res, next);
   }
 }
 

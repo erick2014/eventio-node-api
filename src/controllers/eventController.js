@@ -31,6 +31,11 @@ class EventsController {
     const currentPage = pageNumber + 1
     const offset = (currentPage - 1) * itemsPerPage;
     const lengthEventsUser = await EventsAttendees.count({ where: { user_id: userId } })
+    let eventsList = []
+
+    if(!lengthEventsUser){
+      return { eventsList, lengthEvents: 0 };
+    }
 
     const eventsUser = await EventsAttendees.findAll({
       limit: itemsPerPage,
@@ -60,7 +65,7 @@ class EventsController {
       ],
     });
 
-    let eventsList = eventsUser.map((element) => {
+    eventsList = eventsUser.map((element) => {
       return this.buildEventData(element)
     });
 

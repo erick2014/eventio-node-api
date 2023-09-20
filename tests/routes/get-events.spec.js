@@ -35,9 +35,11 @@ describe("Event test", () => {
   });
 
   it("GET / Should return 200 and all events in the database", async () => {
-    const pageNumber =  0
-    const itemsPerPage = 6  
-    const response = await request(app).get(`/events/${pageNumber}/${itemsPerPage}`);
+    const params  = {
+      pageNumber: 0, itemsPerPage: 6 
+    }
+
+    const response = await request(app).get("/events/pagination").query(params);
     const events = response.body.eventsList
     const lengthEvents = response.body.lengthEvents
     expect(response.status).to.equal(200);
@@ -56,6 +58,58 @@ describe("Event test", () => {
     expect(firstEvent).to.have.property("eventOwner");
     expect(firstEvent).to.have.property("host");
     expect(firstEvent).to.have.property("attendees");
+  });
+
+  it("GET / It should return 400 and error if the parameters entered are not correct", async () => {
+    const params  = {
+      pageNumber: "Emma", itemsPerPage: "Isabella"
+    }
+    
+    const response = await request(app).get("/events/pagination").query(params);
+    expect(response.status).to.equal(400);
+    expect(response.body).to.deep.equal({
+      error: '"Page Number" must be a number, "Item Per Page" must be a number'
+    })
+  });
+
+  it("GET / Should return 200 and all user events in the database", async () => {
+    const params  = {
+      userId: createdEvent.owner_id,
+      pageNumber: 0, 
+      itemsPerPage: 6 
+    }
+
+    const response = await request(app).get("/events/pagination").query(params);
+    const events = response.body.eventsList
+    const lengthEvents = response.body.lengthEventsUser
+    expect(response.status).to.equal(200);
+    expect(events).to.be.an("array");
+    expect(events.length).to.be.greaterThan(0);
+    expect(lengthEvents).to.be.an("number");
+    expect(lengthEvents).to.deep.equal(events.length)
+
+    const firstEvent = events[0];
+    expect(firstEvent).to.have.property("id").and.not.be.null;
+    expect(firstEvent).to.have.property("nameEvent");
+    expect(firstEvent).to.have.property("descriptionEvent");
+    expect(firstEvent).to.have.property("date");
+    expect(firstEvent).to.have.property("time");
+    expect(firstEvent).to.have.property("capacity");
+    expect(firstEvent).to.have.property("eventOwner");
+    expect(firstEvent).to.have.property("host");
+    expect(firstEvent).to.have.property("attendees");
+  });
+
+  it("GET / It should return 400 and error if the parameters entered are not correct", async () => {
+    const params  = {
+      userId: "Emma", pageNumber: "Emma", itemsPerPage: "Isabella"
+    }
+    
+    const response = await request(app).get("/events/pagination").query(params);
+    expect(response.status).to.equal(400);
+    expect(response.body).to.deep.equal({
+      error: '"Page Number" must be a number, "Item Per Page" must be a number, "userId" is not allowed'
+    })
   });
 
   it("GET /event/:eventId Should return 200 and find an event", async () => {

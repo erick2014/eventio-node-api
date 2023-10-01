@@ -253,7 +253,7 @@ describe("Event test", () => {
     });
   })
 
-  it("POST /events/join Should return 404 and error if the user already joined the event", async () => {
+  it("POST /events/join Should return 400 and error if the user already joined the event", async () => {
     const eventId = createdEvent.id;
     const userId = createdEvent.owner_id
     const dataToRequest = { userId, eventId }

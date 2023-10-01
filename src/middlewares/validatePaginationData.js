@@ -1,5 +1,5 @@
 const { validateRequest } = require("./validateData.js")
-const { getAllUserEventsSchema, getAllEventsSchema } = require("../routes/schemas/events.js")
+const { getAllEventsByUserSchema, getAllEventsSchema } = require("../routes/schemas/events.js")
 
 function selectValidationSchema(req, res, next) {
   if(req.query.userId){
@@ -10,7 +10,7 @@ function selectValidationSchema(req, res, next) {
 
 
   if (req.query.userId) {
-    validateRequest(getAllUserEventsSchema, "query")(req, res, next);
+    validateRequest(getAllEventsByUserSchema, "query")(req, res, next);
   } else {
     validateRequest(getAllEventsSchema, "query")(req, res, next);
   }

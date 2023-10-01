@@ -23,7 +23,7 @@ const joinAndLeaveEventSchema = Joi.object({
   eventId: Joi.number().required().label("Event Id"),
 });
 
-const getAllUserEventsSchema = Joi.object({
+const getAllEventsByUserSchema = Joi.object({
   userId: Joi.number().required().label("User Id"),
   pageNumber: Joi.number().required().label("Page Number"),
   itemsPerPage: Joi.number().required().label("Item Per Page")
@@ -38,6 +38,6 @@ module.exports={
   eventEditSchema,
   eventSchema,
   joinAndLeaveEventSchema,
-  getAllUserEventsSchema,
+  getAllEventsByUserSchema,
   getAllEventsSchema
 }

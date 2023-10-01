@@ -60,7 +60,7 @@ describe("Event test", () => {
     expect(firstEvent).to.have.property("attendees");
   });
 
-  it("GET / It should return 400 and error if the parameters entered are not correct", async () => {
+  it("GET / should return 400 error if the parameters are not correct", async () => {
     const params  = {
       pageNumber: "Emma", itemsPerPage: "Isabella"
     }
@@ -98,6 +98,29 @@ describe("Event test", () => {
     expect(firstEvent).to.have.property("eventOwner");
     expect(firstEvent).to.have.property("host");
     expect(firstEvent).to.have.property("attendees");
+  });
+
+  it("GET / Should return 200 and return one event", async () => {
+
+    const event2 = {
+      title: "Blockchain",
+      description: "Learn Blockchain",
+      event_date: "23/01/1993",
+      event_time: "18:00PM",
+      capacity: 5,
+      userId: createdEvent.owner_id,
+    };
+    await eventsController.create(event2);
+
+    const params  = {
+      pageNumber: 0, itemsPerPage: 1
+    }
+
+    const response = await request(app).get("/events/pagination").query(params);
+    const events = response.body.eventsList
+    const lengthEvents = events.length
+    expect(response.status).to.equal(200);
+    expect(lengthEvents).to.deep.equal(1)
   });
 
   it("GET / It should return 400 and error if the parameters entered are not correct", async () => {

@@ -1,21 +1,19 @@
 const { Router } = require("express");
-const EventsController = require("../controllers/eventController.js");
-const { eventSchema, validateRequest } = require("../routes/validateData.js");
+const { validateRequest } = require("../middlewares/validateData.js");
+const { eventSchema, joinAndLeaveEventSchema, eventEditSchema } = require("./schemas/events.js");
+const { validateIsEventOwner } = require("../middlewares/validateIsOwner.js")
+const  { validateLeaveEvent } = require("../middlewares/validateLeaveEvent.js")
+const { validateJoinEvent } = require("../middlewares/validateJoinEvent.js")
+const { validateIfUserExist } = require("../middlewares/validateUser.js")
+const { selectValidationSchema } = require("../middlewares/validatePaginationData.js")
 
+const EventsController = require("../controllers/eventController.js");
 const eventRouter = Router();
 const eventsController = new EventsController();
 
-eventRouter.get("/", async (_, res, next) => {
-  try {
-    const events = await eventsController.getAllEvents();
-    res.json(events);
-  } catch (error) {
-    next(error);
-  }
-});
-
-eventRouter.post("/:id", async (req, res, next) => {
-  const eventId = parseInt(req.params.id);
+//get an event
+eventRouter.get("/event/:eventId", async (req, res, next) => {
+  const eventId = parseInt(req.params.eventId);
 
   try {
     const event = await eventsController.getEvent(eventId);
@@ -26,17 +24,71 @@ eventRouter.post("/:id", async (req, res, next) => {
   }
 });
 
-eventRouter.post("/", validateRequest(eventSchema), async (req, res, next) => {
-  const { title, description, event_date, event_time, capacity } = req.body;
+//get all events
+eventRouter.get("/pagination", 
+selectValidationSchema, 
+async (req, res, next) => {
+  try {
+    let events = []
+
+    if (req.query.userId){
+      events = await eventsController.getUserEvents(req.query);
+    } else {
+      events = await eventsController.getAllEvents(req.query);
+    }
+
+    res.json(events);
+  } catch (error) {
+    next(error);
+  }
+});
+
+//join user to an event
+eventRouter.post(
+  "/join",
+  validateRequest(joinAndLeaveEventSchema),
+  validateIfUserExist,
+  validateJoinEvent,
+  async (req, res, next) => {  
+    const { userId, eventId } = req.body;
+
+    try {
+      const joinToEvent = await eventsController.joinEvent(
+        eventId,
+        userId,
+        false
+      );
+
+      res.send(joinToEvent);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+//leave an event
+eventRouter.delete(
+  "/leave", 
+  validateRequest(joinAndLeaveEventSchema),
+  validateLeaveEvent, async(req, res, next) => {
+    try {
+      const leaveTheEvent = await eventsController.leaveEvent(req.body);
+      res.send(leaveTheEvent);
+    } catch (error) {
+      next(error);
+    }
+  }
+)
+
+//Create an event
+eventRouter.post("/", validateRequest(eventSchema), 
+validateIfUserExist, 
+async (req, res, next) => {
 
   try {
-    const newEvent = await eventsController.create({
-      title,
-      description,
-      event_date,
-      event_time,
-      capacity,
-    });
+    const newEvent = await eventsController.create(
+      req.body
+    );
 
     res.json(newEvent);
   } catch (error) {
@@ -44,19 +96,18 @@ eventRouter.post("/", validateRequest(eventSchema), async (req, res, next) => {
   }
 });
 
+//update an event
 eventRouter.put(
   "/:id",
-  validateRequest(eventSchema),
+  validateRequest(eventEditSchema),
+  validateIsEventOwner,
   async (req, res, next) => {
-    const { title, description, event_date, event_time, capacity } = req.body;
     const eventId = parseInt(req.params.id);
-
     try {
       const eventUpdated = await eventsController.update(
-        { title, description, event_date, event_time, capacity },
+        req.body,
         eventId
       );
-
       res.json(eventUpdated);
     } catch (error) {
       next(error);
@@ -64,7 +115,9 @@ eventRouter.put(
   }
 );
 
-eventRouter.delete("/:id", async (req, res, next) => {
+//delete an event
+eventRouter.delete("/:id", 
+validateIsEventOwner, async (req, res, next) => {
   const eventId = parseInt(req.params.id);
 
   try {

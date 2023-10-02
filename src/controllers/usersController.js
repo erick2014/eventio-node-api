@@ -29,19 +29,27 @@ class UsersController {
     return user;
   }
 
-  async loginUser({ email, password }) {
+  async loginUser(userData) {
+    const { email, password } = userData
     const userLogin = await Users.findOne({
-      where: { email: email, password: password },
+      where: { email: email },
       raw: true,
     });
 
     if (!userLogin) {
+      const error = new Error("This account is not registered");
+      error.statusCode = 401;
+      throw error;
+    }
+
+    if (userLogin.password !== password) {
       const error = new Error("Invalid email or password");
       error.statusCode = 401;
       throw error;
     }
 
     return {
+      id: userLogin.id,
       firstName: userLogin.firstName,
       lastName: userLogin.lastName,
       email: userLogin.email,

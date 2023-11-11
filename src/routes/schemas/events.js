@@ -34,10 +34,15 @@ const getAllEventsSchema = Joi.object({
   itemsPerPage: Joi.number().required().label("Item Per Page")
 })
 
+const headersSchema = Joi.object({
+  "authorization": Joi.string().label("Token Authorization")
+}).unknown(true);
+
 module.exports={
   eventEditSchema,
   eventSchema,
   joinAndLeaveEventSchema,
   getAllEventsByUserSchema,
-  getAllEventsSchema
+  getAllEventsSchema,
+  headersSchema
 }

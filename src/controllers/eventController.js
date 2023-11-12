@@ -25,8 +25,8 @@ class EventsController {
     return event
   }
 
-  async getUserEvents(dataParams) {
-    let  { pageNumber, itemsPerPage, userId } = dataParams
+  async getUserEvents(dataParams, userId) {
+    let  { pageNumber, itemsPerPage } = dataParams
 
     const currentPage = pageNumber + 1
     const offset = (currentPage - 1) * itemsPerPage;

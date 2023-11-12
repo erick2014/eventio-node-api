@@ -37,7 +37,7 @@ async (req, res, next) => {
     let events =  []
 
     if (userId){
-      events = await eventsController.getUserEvents(req.query);
+      events = await eventsController.getUserEvents(req.query, userId);
     } else {
       events = await eventsController.getAllEvents(req.query);
     }

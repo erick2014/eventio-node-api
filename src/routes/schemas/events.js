@@ -24,7 +24,6 @@ const joinAndLeaveEventSchema = Joi.object({
 });
 
 const getAllEventsByUserSchema = Joi.object({
-  userId: Joi.number().required().label("User Id"),
   pageNumber: Joi.number().required().label("Page Number"),
   itemsPerPage: Joi.number().required().label("Item Per Page")
 })

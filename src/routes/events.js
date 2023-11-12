@@ -1,11 +1,12 @@
 const { Router } = require("express");
 const { validateRequest } = require("../middlewares/validateData.js");
-const { eventSchema, joinAndLeaveEventSchema, eventEditSchema } = require("./schemas/events.js");
+const { eventSchema, joinAndLeaveEventSchema, eventEditSchema, headersSchema } = require("./schemas/events.js");
 const { validateIsEventOwner } = require("../middlewares/validateIsOwner.js")
 const  { validateLeaveEvent } = require("../middlewares/validateLeaveEvent.js")
 const { validateJoinEvent } = require("../middlewares/validateJoinEvent.js")
 const { validateIfUserExist } = require("../middlewares/validateUser.js")
 const { selectValidationSchema } = require("../middlewares/validatePaginationData.js")
+const { validateAccessToken } = require("../middlewares/validateAccessToken.js")
 
 const EventsController = require("../controllers/eventController.js");
 const eventRouter = Router();
@@ -26,12 +27,16 @@ eventRouter.get("/event/:eventId", async (req, res, next) => {
 
 //get all events
 eventRouter.get("/pagination", 
+validateRequest(headersSchema, "headers"),
+validateAccessToken,
 selectValidationSchema, 
 async (req, res, next) => {
-  try {
-    let events = []
 
-    if (req.query.userId){
+  try {
+    const userId = req.idDecoded
+    let events =  []
+
+    if (userId){
       events = await eventsController.getUserEvents(req.query);
     } else {
       events = await eventsController.getAllEvents(req.query);

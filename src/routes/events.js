@@ -51,11 +51,14 @@ async (req, res, next) => {
 //join user to an event
 eventRouter.post(
   "/join",
+  validateRequest(headersSchema, "headers"),
+  validateAccessToken,  
   validateRequest(joinAndLeaveEventSchema),
   validateIfUserExist,
   validateJoinEvent,
   async (req, res, next) => {  
-    const { userId, eventId } = req.body;
+    const { eventId } = req.body;
+    const userId  = req.idDecoded;
 
     try {
       const joinToEvent = await eventsController.joinEvent(
@@ -74,10 +77,14 @@ eventRouter.post(
 //leave an event
 eventRouter.delete(
   "/leave", 
+  validateRequest(headersSchema, "headers"),
+  validateAccessToken, 
   validateRequest(joinAndLeaveEventSchema),
-  validateLeaveEvent, async(req, res, next) => {
+  validateLeaveEvent, 
+  async(req, res, next) => {
     try {
-      const leaveTheEvent = await eventsController.leaveEvent(req.body);
+      const userId  = req.idDecoded;
+      const leaveTheEvent = await eventsController.leaveEvent(req.body, userId);
       res.send(leaveTheEvent);
     } catch (error) {
       next(error);
@@ -87,12 +94,15 @@ eventRouter.delete(
 
 //Create an event
 eventRouter.post("/", validateRequest(eventSchema), 
+validateRequest(headersSchema, "headers"),
+validateAccessToken,
 validateIfUserExist, 
 async (req, res, next) => {
 
   try {
+    const userId = req.idDecoded 
     const newEvent = await eventsController.create(
-      req.body
+      req.body, userId
     );
 
     res.json(newEvent);
@@ -104,6 +114,8 @@ async (req, res, next) => {
 //update an event
 eventRouter.put(
   "/:id",
+  validateRequest(headersSchema, "headers"),
+  validateAccessToken,
   validateRequest(eventEditSchema),
   validateIsEventOwner,
   async (req, res, next) => {
@@ -122,7 +134,10 @@ eventRouter.put(
 
 //delete an event
 eventRouter.delete("/:id", 
-validateIsEventOwner, async (req, res, next) => {
+validateRequest(headersSchema, "headers"),
+validateAccessToken,
+validateIsEventOwner, 
+async (req, res, next) => {
   const eventId = parseInt(req.params.id);
 
   try {

@@ -18,7 +18,10 @@ userRouter.post(
   async (req, res, next) => {
     try {
       const newUser = await userController.createUser(req.body);
-      res.json(newUser);
+      const newUserId = newUser.id
+      const accessToken = authController.generateAccessToken(newUserId)
+
+      res.json({newUser, accessToken});
     } catch (error) {
       next(error);
     }

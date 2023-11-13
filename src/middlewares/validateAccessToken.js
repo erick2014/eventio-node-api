@@ -22,6 +22,7 @@ async function validateAccessToken (req, res, next) {
       req.idDecoded = tokenDecoded.idUser;
       next();
     } catch (error) {
+      const errorObj = new Error(error);
       errorObj.statusCode = 403;
       next(errorObj);
     }

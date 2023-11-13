@@ -2,7 +2,8 @@ const { EventsAttendees } = require("../models/associations.js");
 
 async function validateLeaveEvent(req, res, next) {
   try {
-    const { userId, eventId } = req.body;
+    const { eventId } = req.body;
+    const userId  = req.idDecoded;
   
     let recordData = await EventsAttendees.findOne({ where : {event_id: eventId, user_id: userId}})
     

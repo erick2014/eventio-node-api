@@ -2,7 +2,7 @@ const { Events } = require("../models/associations.js");
 
 async function validateIsEventOwner(req, res, next) {
   try {
-    const { userId } = req.body
+    const userId  = req.idDecoded
     const eventId = parseInt(req.params.id);
   
     let event = await Events.findOne({

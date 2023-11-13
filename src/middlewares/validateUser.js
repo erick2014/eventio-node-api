@@ -2,7 +2,8 @@ const { Users } = require("../models/associations.js");
 
 async function validateIfUserExist (req, res, next) {
   try {
-    const { userId } = req.body;
+    const userId  = req.idDecoded;
+    
     let user = await Users.findOne({ 
       where : { id: userId }
     })

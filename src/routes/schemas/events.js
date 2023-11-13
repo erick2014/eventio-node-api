@@ -1,7 +1,6 @@
 const Joi = require("joi");
 
 const eventSchema = Joi.object({
-  userId: Joi.number().required().label("User Id"),
   title: Joi.string().required().label("Title"),
   description: Joi.string().required().label("Description"),
   event_date: Joi.string().required().label("Date"),
@@ -10,7 +9,6 @@ const eventSchema = Joi.object({
 });
 
 const eventEditSchema = Joi.object({
-  userId: Joi.number().required().label("User Id"),
   title: Joi.string().optional().label("Title"),
   description: Joi.string().optional().label("Description"),
   event_date: Joi.string().optional().label("Date"),
@@ -19,7 +17,6 @@ const eventEditSchema = Joi.object({
 });
 
 const joinAndLeaveEventSchema = Joi.object({
-  userId: Joi.number().required().label("User Id"),
   eventId: Joi.number().required().label("Event Id"),
 });
 

@@ -93,7 +93,8 @@ eventRouter.delete(
 )
 
 //Create an event
-eventRouter.post("/", validateRequest(eventSchema), 
+eventRouter.post("/", 
+validateRequest(eventSchema), 
 validateRequest(headersSchema, "headers"),
 validateAccessToken,
 validateIfUserExist, 

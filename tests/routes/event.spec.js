@@ -12,14 +12,18 @@ const {
 
 describe("Event test", () => {
   let createdEvent;
+  let accessToken;
 
   before(async () => {
-    const user = await usersController.createUser({
+    const newUser = await usersController.createUser({
       firstName: "Dilan",
       lastName: "Toloza",
       email: "dilan123@gmail.com",
       password: "dilan",
     });
+
+    const userId  = newUser.user.id
+    accessToken = newUser.token
 
     const eventData = {
       title: "Inglés",
@@ -27,9 +31,8 @@ describe("Event test", () => {
       event_date: "23/01/1993",
       event_time: "18:00PM",
       capacity: 10,
-      userId: user.id,
     };
-    createdEvent = await eventsController.create(eventData);
+    createdEvent = await eventsController.create(eventData, userId);
   });
 
   after(async () => {
@@ -37,111 +40,145 @@ describe("Event test", () => {
     await usersController.deleteAllUsers();
   });
 
-  it("POST / Should create an event ", async () => {
-    createdEvent = createdEvent.get({ plain: true });
+  it("POST /events/ Should return 200 and create an event ", async () => {
+    const eventData = {
+      title: "Inglés",
+      description: "Learn Inglés",
+      event_date: "23/01/1993",
+      event_time: "18:00PM",
+      capacity: 10,
+    };
 
-    expect(createdEvent).to.have.property("id").and.not.be.null;
-    expect(createdEvent).to.have.property("title");
-    expect(createdEvent).to.have.property("description");
-    expect(createdEvent).to.have.property("event_date");
-    expect(createdEvent).to.have.property("event_time");
-    expect(createdEvent).to.have.property("capacity");
-    expect(createdEvent).to.have.property("owner_id");
+    const response = await request(app)
+    .post("/events/")
+    .send(eventData)
+    .set("authorization", accessToken);
+
+    const event = response.body
+
+    expect(response.status).to.equal(200);
+    expect(event).to.have.property("id").and.not.be.null;
+    expect(event).to.have.property("title");
+    expect(event).to.have.property("description");
+    expect(event).to.have.property("event_date");
+    expect(event).to.have.property("event_time");
+    expect(event).to.have.property("capacity");
+    expect(event).to.have.property("owner_id");
   });
 
-  it("POST / Should return an error if body is empty ", async () => {
-    const response = await request(app).post("/events/").send();
+  it("POST /events/ Should return an error if body is empty ", async () => {
+    const response = await request(app)
+    .post("/events/")
+    .send()
+    .set("authorization", accessToken);
+
     expect(response.status).to.equal(400);
     expect(response.body).to.deep.equal(mockedErrorParamsEmptyCreateEvent);
   });
 
-  it("POST / Should return an error if body.title is empty", async () => {
+  it("POST /events/ Should return an error if body.title is empty", async () => {
     const newEvent = {
       description: "learned about Python",
       event_date: "23/12/2024",
       event_time: "06:00PM",
       capacity: "12",
-      userId: 1,
     };
 
-    const response = await request(app).post("/events/").send(newEvent);
+    const response = await request(app)
+    .post("/events/")
+    .send(newEvent)
+    .set("authorization", accessToken);
+
     expect(response.status).to.equal(400);
     expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Title"));
   });
   
-  it("POST / Should return an error if user not exist", async () => {
+  it("POST /events/ Should return an error if user not exist", async () => {
     const newEvent = {
       title: "Python",
       description: "Learn Inglés",
       event_date: "23/12/2024",
       event_time: "06:00PM",
       capacity: "12",
-      userId: 15,
     };
 
-    const response = await request(app).post("/events/").send(newEvent);
+    const response = await request(app)
+    .post("/events/")
+    .send(newEvent);
 
-    expect(response.status).to.equal(404);
-    expect(response.body).to.deep.equal({ error: "User not found" });
-  });
+    expect(response.status).to.equal(403);
+    expect(response.body).to.deep.equal({ error: "User Id is required" });
+  }); 
 
-  it("POST / Should return an error if body.description is empty", async () => {
+  it("POST /events/ Should return an error if body.description is empty", async () => {
     const newEvent = {
       title: "Python",
       event_date: "23/12/2024",
       event_time: "06:00PM",
       capacity: "12",
-      userId: 1,
     };
 
-    const response = await request(app).post("/events/").send(newEvent);
+    const response = await request(app)
+    .post("/events/")
+    .send(newEvent)
+    .set("authorization", accessToken);
+
     expect(response.status).to.equal(400);
     expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Description"));
   });
 
-  it("POST / Should return an error if body.event_date is empty", async () => {
+  it("POST /events/ Should return an error if body.event_date is empty", async () => {
     const newEvent = {
       title: "Python",
       description: "learned about Python",
       event_time: "06:00PM",
       capacity: "12",
-      userId: 1,
     };
 
-    const response = await request(app).post("/events/").send(newEvent);
+    const response = await request(app)
+    .post("/events/")
+    .send(newEvent)
+    .set("authorization", accessToken);
+
     expect(response.status).to.equal(400);
     expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Date"));
   });
 
-  it("POST / Should return an error if body.event_time is empty", async () => {
+  it("POST /events/ Should return an error if body.event_time is empty", async () => {
     const newEvent = {
       title: "Python",
       description: "learned about Python",
       event_date: "23/12/2024",
       capacity: "12",
-      userId: 1,
     };
 
-    const response = await request(app).post("/events/").send(newEvent);
+    const response = await request(app)
+    .post("/events/")
+    .send(newEvent)
+    .set("authorization", accessToken);
+
     expect(response.status).to.equal(400);
     expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Time"));
   });
 
-  it("POST / Should return an error if body.capacity is empty", async () => {
+  it("POST /events/ Should return an error if body.capacity is empty", async () => {
     const newEvent = {
       title: "Python",
       description: "learned about Python",
       event_date: "23/12/2024",
       event_time: "06:00PM",
-      userId: 1,
     };
 
-    const response = await request(app).post("/events/").send(newEvent);
+    const response = await request(app)
+    .post("/events/")
+    .send(newEvent)
+    .set("authorization", accessToken);
+
     expect(response.status).to.equal(400);
     expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Capacity"));
   });
 
-  it("POST / Should return an error if body.userId is empty", async () => {
+  it("POST /events/ Should return an error if userId is empty", async () => {
     const newEvent = {
       title: "Python",
       description: "learned about Python",
@@ -150,14 +187,16 @@ describe("Event test", () => {
       capacity: "12",
     };
 
-    const response = await request(app).post("/events/").send(newEvent);
-    expect(response.status).to.equal(400);
-    expect(response.body).to.deep.equal(mockedErrorParamsEmpty("User Id"));
-  });
+    const response = await request(app)
+    .post("/events/")
+    .send(newEvent)
 
-  it("PUT Should return 200 and return the event updated", async () => {
+    expect(response.status).to.equal(403);
+    expect(response.body).to.deep.equal({ error: 'User Id is required' });
+  }); 
+
+  it("PUT /events/ Should return 200 and return the event updated", async () => {
     const eventUpdate = {
-      userId: createdEvent.owner_id,
       title: "Py",
       description: "learned about Py",
       event_date: "23/12/2024",
@@ -168,7 +207,9 @@ describe("Event test", () => {
 
     const response = await request(app)
       .put(`/events/${eventId}`)
-      .send(eventUpdate);
+      .send(eventUpdate)
+      .set("authorization", accessToken);
+
     expect(response.status).to.equal(200);
     expect(typeof response.body).to.equal('object');
     expect(response.body.id).to.deep.equal(eventId);
@@ -184,11 +225,12 @@ describe("Event test", () => {
       event_date: "23/12/2024",
       event_time: "06:00PM",
       capacity: "12",
-      userId: 1,
     };
     const response = await request(app)
       .put(`/events/${eventId}`)
-      .send(eventUpdate);
+      .send(eventUpdate)
+      .set("authorization", accessToken);
+
     expect(response.status).to.equal(404);
     expect(response.body).to.deep.equal({ error: "Event not found" });
   });
@@ -201,9 +243,14 @@ describe("Event test", () => {
       password: "dilan123",
     });
 
+    const token = user2.token
     const eventId = createdEvent.id;
-    const dataToRequest = { userId : user2.id, eventId }
-    const response = await request(app).post("/events/join").send(dataToRequest)
+ 
+    const response = await request(app)
+    .post("/events/join")
+    .send({ eventId })
+    .set("authorization", token);
+
     expect(response.status).to.equal(200);
     expect(response.body).to.deep.equal({
       success: true,
@@ -217,9 +264,9 @@ describe("Event test", () => {
       event_date: "25/01/1994",
       event_time: "20:00PM",
       capacity: 1,
-      userId: createdEvent.owner_id,
     };
-    const event = await eventsController.create(eventData);
+    const userId = createdEvent.owner_id
+    const event = await eventsController.create(eventData, userId);
     const eventId = event.id;
 
     const user2 = await usersController.createUser({
@@ -229,8 +276,13 @@ describe("Event test", () => {
       password: "dilan123",
     });
 
-    const dataToRequest = { userId : user2.id, eventId }
-    const response = await request(app).post("/events/join").send(dataToRequest)
+    const token = user2.token
+
+    const response = await request(app)
+    .post("/events/join")
+    .send({ eventId })
+    .set("authorization", token);
+
     expect(response.status).to.equal(404);
     expect(response.body).to.deep.equal({
       error: "You cannot join the event, the capacity is full.",
@@ -245,8 +297,13 @@ describe("Event test", () => {
       password: "dilan123",
     });
 
-    const dataToRequest = { userId : user2.id, eventId : 13}
-    const response = await request(app).post("/events/join").send(dataToRequest)
+    const token = user2.token
+
+    const response = await request(app)
+    .post("/events/join")
+    .send({ eventId : 13})
+    .set("authorization", token);
+
     expect(response.status).to.equal(404);
     expect(response.body).to.deep.equal({
       error: "Event not found",
@@ -255,29 +312,35 @@ describe("Event test", () => {
 
   it("POST /events/join Should return 400 and error if the user already joined the event", async () => {
     const eventId = createdEvent.id;
-    const userId = createdEvent.owner_id
-    const dataToRequest = { userId, eventId }
 
-    const response = await request(app).post("/events/join").send(dataToRequest)
+    const response = await request(app)
+    .post("/events/join")
+    .send({ eventId })
+    .set("authorization", accessToken);
+
     expect(response.status).to.equal(400);
     expect(response.body).to.deep.equal({error: "You are already join to this event"});
   })
 
   it("POST /events/join Should return 400 and error if body.eventId param is empty", async () => {
-    const userId = createdEvent.owner_id
-    const dataToRequest = { userId }
 
-    const response = await request(app).post("/events/join").send(dataToRequest)
+    const response = await request(app)
+    .post("/events/join")
+    .send()
+    .set("authorization", accessToken);
+
     expect(response.status).to.equal(400);
     expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Event Id"));
   })
 
-  it("POST /events/join Should return 400 and error if body.userId param is empty", async () => {
+ it("POST /events/join Should return 400 and error if userId is empty", async () => {
     const eventId = createdEvent.id;
-    const dataToRequest = { eventId }
 
-    const response = await request(app).post("/events/join").send(dataToRequest)
-    expect(response.status).to.equal(400);
-    expect(response.body).to.deep.equal(mockedErrorParamsEmpty("User Id"));
+    const response = await request(app)
+    .post("/events/join")
+    .send({ eventId })
+
+    expect(response.status).to.equal(403);
+    expect(response.body).to.deep.equal({ error: "User Id is required"});
   })
 });

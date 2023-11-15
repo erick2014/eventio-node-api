@@ -4,6 +4,12 @@ async function validateLeaveEvent(req, res, next) {
   try {
     const { eventId } = req.body;
     const userId  = req.idDecoded;
+
+    if(!userId){
+      const error = new Error("User Id is required");
+      error.statusCode = 403;
+      throw error
+    }
   
     let recordData = await EventsAttendees.findOne({ where : {event_id: eventId, user_id: userId}})
     

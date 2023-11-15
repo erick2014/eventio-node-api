@@ -3,6 +3,13 @@ const { Events } = require("../models/associations.js");
 async function validateIsEventOwner(req, res, next) {
   try {
     const userId  = req.idDecoded
+
+    if(!userId){
+      const error = new Error("User Id is required");
+      error.statusCode = 403;
+      throw error
+    }
+    
     const eventId = parseInt(req.params.id);
   
     let event = await Events.findOne({

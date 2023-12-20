@@ -42,4 +42,4 @@ if(token){
 }
 }
 
-module.exports = { generateAccessToken, verifyToken, validateAccessToken };
+module.exports = { generateAccessToken, validateAccessToken };

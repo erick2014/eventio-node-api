@@ -1,6 +1,5 @@
 const { Users } = require("../models/usersModel.js");
-const AuthController = require("../controllers/authController.js")
-const authController = new AuthController()
+const { generateAccessToken } = require("../services/AuthService.js") 
 
 class UsersController {
   async findUser(email) {
@@ -36,7 +35,7 @@ class UsersController {
       email: newUser.email,
     }
 
-    const token = authController.generateAccessToken(newUser.id)
+    const token = await generateAccessToken(newUser.id)
 
     return { user, token };
   }
@@ -67,7 +66,7 @@ class UsersController {
       email: userLogin.email,
     }
 
-    const token = authController.generateAccessToken(dataUser.id)
+    const token = await generateAccessToken(dataUser.id)
 
     return { dataUser, token };
   }

@@ -6,7 +6,7 @@ const  { validateLeaveEvent } = require("../middlewares/validateLeaveEvent.js")
 const { validateJoinEvent } = require("../middlewares/validateJoinEvent.js")
 const { validateIfUserExist } = require("../middlewares/validateUser.js")
 const { selectValidationSchema } = require("../middlewares/validatePaginationData.js")
-const { validateAccessToken } = require("../middlewares/validateAccessToken.js")
+const { validateAccessToken } = require("../services/AuthService.js")
 
 const EventsController = require("../controllers/eventController.js");
 const eventRouter = Router();

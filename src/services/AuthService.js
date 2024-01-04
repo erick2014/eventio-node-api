@@ -6,9 +6,9 @@ const generateAccessToken = async (idUser) => {
     const tokenAuthentication = await jwt.sign(userId, process.env.SECRET, {expiresIn: "1h"})
     return tokenAuthentication
   } catch (error) {
-    const errorObj = new Error(error);
+    const errorObj = new Error(error.message);
     errorObj.statusCode = 400;
-    next(errorObj);
+    throw errorObj
   }
 }
 
@@ -33,7 +33,7 @@ if(token){
     req.idDecoded = tokenDecoded.idUser;
     next();
   } catch (error) {
-    const errorObj = new Error(error);
+    const errorObj = new Error(error.message);
     errorObj.statusCode = 403;
     next(errorObj);
   }

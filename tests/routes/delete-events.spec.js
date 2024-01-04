@@ -61,7 +61,7 @@ describe("Event test", () => {
 
     expect(response.status).to.equal(403);
     expect(response.body).to.deep.equal({
-      error: 'TokenExpiredError: jwt expired'
+      error: 'jwt expired'
     });
   });
 
@@ -75,7 +75,7 @@ describe("Event test", () => {
 
     expect(response.status).to.equal(403);
     expect(response.body).to.deep.equal({
-      error: "JsonWebTokenError: jwt malformed"
+      error: "jwt malformed"
     });
   });
 

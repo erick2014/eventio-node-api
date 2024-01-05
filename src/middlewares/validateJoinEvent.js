@@ -2,7 +2,14 @@ const { EventsAttendees, Events } = require("../models/associations.js");
 
 async function validateJoinEvent(req, res, next) {
   try {
-    const { userId, eventId } = req.body;
+    const { eventId } = req.body;
+    const userId  = req.idDecoded;
+
+    if(!userId){
+      const error = new Error("User Id is required");
+      error.statusCode = 403;
+      throw error
+    }
   
     let result = await EventsAttendees.findOne({ where : {event_id: eventId, user_id: userId}})
     

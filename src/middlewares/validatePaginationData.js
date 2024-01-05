@@ -1,15 +1,12 @@
 const { validateRequest } = require("./validateData.js")
-const { getAllEventsByUserSchema, getAllEventsSchema } = require("../routes/schemas/events.js")
+const { getAllEventsByUserSchema, getAllEventsSchema, headersSchema } = require("../routes/schemas/events.js")
 
 function selectValidationSchema(req, res, next) {
-  if(req.query.userId){
-    req.query.userId = Number(req.query.userId)
-  }
+  const userId =  req.idDecoded
   req.query.pageNumber = Number(req.query.pageNumber)
   req.query.itemsPerPage = Number(req.query.itemsPerPage)
 
-
-  if (req.query.userId) {
+  if (userId) {
     validateRequest(getAllEventsByUserSchema, "query")(req, res, next);
   } else {
     validateRequest(getAllEventsSchema, "query")(req, res, next);

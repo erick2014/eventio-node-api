@@ -1,4 +1,5 @@
 const { Users } = require("../models/usersModel.js");
+const { generateAccessToken } = require("../services/AuthService.js") 
 
 class UsersController {
   async findUser(email) {
@@ -13,20 +14,30 @@ class UsersController {
     const { firstName, lastName, email, password } = userData;
 
     const existingEmail = await this.findUser(email);
+
     if (existingEmail) {
       const error = new Error("This user already exists");
       error.statusCode = 400;
       throw error;
     }
 
-    const user = Users.create({
+    const newUser = await Users.create({
       firstName,
       lastName,
       email,
       password,
     });
 
-    return user;
+    const user = {
+      id: newUser.id,
+      firstName: newUser.firstName,
+      lastName: newUser.lastName,
+      email: newUser.email,
+    }
+
+    const token = await generateAccessToken(newUser.id)
+
+    return { user, token };
   }
 
   async loginUser(userData) {
@@ -48,12 +59,16 @@ class UsersController {
       throw error;
     }
 
-    return {
+    const dataUser = {
       id: userLogin.id,
       firstName: userLogin.firstName,
       lastName: userLogin.lastName,
       email: userLogin.email,
-    };
+    }
+
+    const token = await generateAccessToken(dataUser.id)
+
+    return { dataUser, token };
   }
 
   async deleteAllUsers() {

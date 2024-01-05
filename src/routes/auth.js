@@ -15,8 +15,11 @@ userRouter.post(
   validateRequest(createUserSchema),
   async (req, res, next) => {
     try {
-      const newUser = await userController.createUser(req.body);
-      res.json(newUser);
+      const dataLogin = await userController.createUser(req.body);
+      const newUser = dataLogin.user
+      const accessToken = dataLogin.token
+
+      res.json({newUser, accessToken});
     } catch (error) {
       next(error);
     }
@@ -29,9 +32,12 @@ userRouter.post(
   async (req, res, next) => {
 
     try {
-      const userFound = await userController.loginUser(req.body);
+      const dataFound = await userController.loginUser(req.body);
+      const userFound = dataFound.dataUser
+      const accessToken = dataFound.token
+      
 
-      res.json(userFound);
+      res.json({userFound, accessToken});
     } catch (error) {
       next(error);
     }

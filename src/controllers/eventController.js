@@ -25,8 +25,8 @@ class EventsController {
     return event
   }
 
-  async getUserEvents(dataParams) {
-    let  { pageNumber, itemsPerPage, userId } = dataParams
+  async getUserEvents(dataParams, userId) {
+    let  { pageNumber, itemsPerPage } = dataParams
 
     const currentPage = pageNumber + 1
     const offset = (currentPage - 1) * itemsPerPage;
@@ -156,9 +156,10 @@ class EventsController {
     return eventData;
   }
 
-  async create(eventData) {
-    const { title, description, event_date, event_time, capacity, userId } =
+  async create(eventData, userId) {
+    const { title, description, event_date, event_time, capacity } =
       eventData;
+
     const event = await Events.create({
       title,
       description,
@@ -174,7 +175,7 @@ class EventsController {
   }
 
   async update(eventData, eventId) {
-    const { userId, ...userParams } =eventData;
+    const { ...userParams } = eventData;
     const dataToUpdate = {
       ...userParams,
     };
@@ -206,8 +207,8 @@ class EventsController {
     return { success: true };
   }
 
-  async leaveEvent(data) {
-    const { userId, eventId } = data;
+  async leaveEvent(data, userId) {
+    const { eventId } = data;
     
     EventsAttendees.destroy({ where : {event_id: eventId, user_id: userId}})
     return { success: true }; 

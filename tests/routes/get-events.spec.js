@@ -9,14 +9,18 @@ const usersController = new UsersController();
 
 describe("Event test", () => {
   let createdEvent;
+  let accessToken;
 
   before(async () => {
-    const user = await usersController.createUser({
+    const newUser = await usersController.createUser({
       firstName: "Dilan",
       lastName: "Toloza",
       email: "dilan123@gmail.com",
       password: "dilan",
     });
+
+    const userId  =  newUser.user.id
+    accessToken = newUser.token
 
     const eventData = {
       title: "Inglés",
@@ -24,9 +28,9 @@ describe("Event test", () => {
       event_date: "23/01/1993",
       event_time: "18:00PM",
       capacity: 10,
-      userId: user.id,
     };
-    createdEvent = await eventsController.create(eventData);
+    
+    createdEvent = await eventsController.create(eventData, userId);
   });
 
   after(async () => {
@@ -34,12 +38,15 @@ describe("Event test", () => {
     await usersController.deleteAllUsers();
   });
 
-  it("GET / Should return 200 and all events in the database", async () => {
+  it("GET /events/pagination Should return 200 and all events in the database", async () => {
     const params  = {
       pageNumber: 0, itemsPerPage: 6 
     }
 
-    const response = await request(app).get("/events/pagination").query(params);
+    const response = await request(app)
+    .get("/events/pagination")
+    .query(params);
+
     const events = response.body.eventsList
     const lengthEvents = response.body.lengthEvents
     expect(response.status).to.equal(200);
@@ -60,26 +67,47 @@ describe("Event test", () => {
     expect(firstEvent).to.have.property("attendees");
   });
 
-  it("GET / should return 400 error if the parameters are not correct", async () => {
+  it("GET /events/pagination should return 400 error if the parameters are not correct", async () => {
     const params  = {
       pageNumber: "Emma", itemsPerPage: "Isabella"
     }
     
-    const response = await request(app).get("/events/pagination").query(params);
+    const response = await request(app)
+    .get("/events/pagination")
+    .query(params);
+
     expect(response.status).to.equal(400);
     expect(response.body).to.deep.equal({
       error: '"Page Number" must be a number, "Item Per Page" must be a number'
     })
   });
 
-  it("GET / Should return 200 and all user events in the database", async () => {
+  it("GET /events/pagination It should return 400 and error if the parameters entered are not correct", async () => {
     const params  = {
-      userId: createdEvent.owner_id,
+      userId: "Emma", pageNumber: "Emma", itemsPerPage: "Isabella"
+    }
+    
+    const response = await request(app)
+    .get("/events/pagination")
+    .query(params);
+
+    expect(response.status).to.equal(400);
+    expect(response.body).to.deep.equal({
+      error: '"Page Number" must be a number, "Item Per Page" must be a number, "userId" is not allowed'
+    })
+  });
+
+  it("GET /events/pagination Should return 200 and all user events in the database", async () => {
+    const params  = {
       pageNumber: 0, 
       itemsPerPage: 6 
     }
 
-    const response = await request(app).get("/events/pagination").query(params);
+    const response = await request(app)
+    .get("/events/pagination")
+    .query(params)
+    .set("authorization", accessToken);
+
     const events = response.body.eventsList
     const lengthEvents = response.body.lengthEventsUser
     expect(response.status).to.equal(200);
@@ -100,7 +128,7 @@ describe("Event test", () => {
     expect(firstEvent).to.have.property("attendees");
   });
 
-  it("GET / Should return 200 and return one event", async () => {
+  it("GET /events/pagination Should return 200 and return one event", async () => {
 
     const event2 = {
       title: "Blockchain",
@@ -108,36 +136,30 @@ describe("Event test", () => {
       event_date: "23/01/1993",
       event_time: "18:00PM",
       capacity: 5,
-      userId: createdEvent.owner_id,
     };
-    await eventsController.create(event2);
+
+    const userId = createdEvent.owner_id
+    await eventsController.create(event2, userId);
 
     const params  = {
       pageNumber: 0, itemsPerPage: 1
     }
 
-    const response = await request(app).get("/events/pagination").query(params);
+    const response = await request(app)
+    .get("/events/pagination")
+    .query(params);
+
     const events = response.body.eventsList
     const lengthEvents = events.length
     expect(response.status).to.equal(200);
     expect(lengthEvents).to.deep.equal(1)
   });
 
-  it("GET / It should return 400 and error if the parameters entered are not correct", async () => {
-    const params  = {
-      userId: "Emma", pageNumber: "Emma", itemsPerPage: "Isabella"
-    }
-    
-    const response = await request(app).get("/events/pagination").query(params);
-    expect(response.status).to.equal(400);
-    expect(response.body).to.deep.equal({
-      error: '"Page Number" must be a number, "Item Per Page" must be a number, "userId" is not allowed'
-    })
-  });
-
   it("GET /event/:eventId Should return 200 and find an event", async () => {
     const eventId = createdEvent.id;
-    const response = await request(app).get(`/events/event/${eventId}`);
+    const response = await request(app)
+    .get(`/events/event/${eventId}`);
+    
     expect(response.status).to.equal(200);
     expect(response.body).to.have.property("id").and.not.be.null;
     expect(response.body).to.have.property("nameEvent");
@@ -153,7 +175,9 @@ describe("Event test", () => {
 
   it("GET /events/:eventId Should return 404 and an error if event does not exist", async () => {
     const eventId = 10;
-    const response = await request(app).get(`/events/event/${eventId}`);
+    const response = await request(app)
+    .get(`/events/event/${eventId}`);
+    
     expect(response.status).to.equal(404);
     expect(response.body).to.deep.equal({ error: "Event not found" });
   });

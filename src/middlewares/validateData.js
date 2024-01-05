@@ -8,6 +8,8 @@ function validateRequest(joiSchema, method = "body") {
       requestData = req.query;
     } else if (method === "params") {
       requestData = req.params;
+    } else if (method === "headers"){
+      requestData = req.headers;
     }
 
     const { error } = joiSchema.validate(requestData, {

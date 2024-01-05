@@ -5,20 +5,27 @@ const EventsController = require("../../src/controllers/eventController.js");
 const eventsController = new EventsController();
 const UsersController = require("../../src/controllers/usersController.js");
 const usersController = new UsersController();
+const { generateAccessToken } = require("../../src/services/AuthService.js")
+
 const {
   mockedErrorParamsEmpty,
 } = require("../mocks/event.mock.js");
 
 describe("Event test", () => {
   let createdEvent;
+  let accessToken;
 
   before(async () => {
-    const user = await usersController.createUser({
+
+    const newUser = await usersController.createUser({
       firstName: "Dilan",
       lastName: "Toloza",
       email: "dilan123@gmail.com",
       password: "dilan",
     });
+    
+    const userId  = newUser.user.id
+    accessToken = newUser.token
 
     const eventData = {
       title: "Inglés",
@@ -26,9 +33,8 @@ describe("Event test", () => {
       event_date: "23/01/1993",
       event_time: "18:00PM",
       capacity: 10,
-      userId: user.id,
     };
-    createdEvent = await eventsController.create(eventData);
+    createdEvent = await eventsController.create(eventData, userId);
   });
 
   after(async () => {
@@ -41,10 +47,42 @@ describe("Event test", () => {
 
     const response = await request(app)
       .delete(`/events/${eventId}`)
-      .send({ userId: createdEvent.owner_id });
+      .set("authorization", accessToken)
+
     expect(response.status).to.equal(200);
     expect(response.body).to.deep.equal({
       success: true,
+    });
+  });
+
+  it("DELETE / Should return 403 and error if token expired", async () => {
+    const eventId = createdEvent.id;
+    const idUser = createdEvent.owner_id
+    const token = await generateAccessToken(idUser, "1s")
+
+    setTimeout( async () => {
+      const response = await request(app)
+      .delete(`/events/${eventId}`)
+      .set("authorization", token)
+
+      expect(response.status).to.equal(403);
+      expect(response.body).to.deep.equal({
+        error: 'jwt expired'
+      });
+    }, 1000);
+  });
+
+  it("DELETE / Should return 403 and error if token is malformed", async () => {
+    const eventId = createdEvent.id;
+
+    const response = await request(app)
+      .delete(`/events/${eventId}`)
+      .set("authorization", "eyJhbGciOiJIUzI1NiIsInR5cCI6Ik")
+    console.log("response", response)
+
+    expect(response.status).to.equal(403);
+    expect(response.body).to.deep.equal({
+      error: "jwt malformed"
     });
   });
 
@@ -55,26 +93,48 @@ describe("Event test", () => {
       event_date: "25/01/1994",
       event_time: "20:00PM",
       capacity: 10,
-      userId: createdEvent.owner_id,
     };
-    const event = await eventsController.create(eventData);
+    const userId = createdEvent.owner_id
+    const event = await eventsController.create(eventData, userId);
     const eventId = event.id;
 
     const response = await request(app)
       .delete(`/events/${eventId}`)
-      .send({ userId: 10 });
-    console.log("response.body", response.body)
-    expect(response.status).to.equal(400) ;
+
+    expect(response.status).to.equal(403) ;
     expect(response.body).to.deep.equal({
-      error: "This user is not the owner of this event",
+      error: "User Id is required",
     });
   }); 
+
+  it("DELETE /events/ Should return 403 and error if authorization is empty ", async () => {
+    const eventData = {
+      title: "Python",
+      description: "Learn Python",
+      event_date: "25/01/1994",
+      event_time: "20:00PM",
+      capacity: 10,
+    };
+    const userId = createdEvent.owner_id
+    const event = await eventsController.create(eventData, userId);
+    const eventId = event.id;
+
+    const response = await request(app)
+      .delete(`/events/${eventId}`)
+      .set("authorization", " ")
+
+    expect(response.status).to.equal(400) ;
+    expect(response.body).to.deep.equal({
+      error: '"Token Authorization" is not allowed to be empty',
+    });
+  });
 
   it("DELETE /events/ Should return 404 and an error if event does not exist", async () => {
     const eventId = 10;
     const response = await request(app)
       .delete(`/events/${eventId}`)
-      .send({ userId: createdEvent.owner_id });
+      .set("authorization", accessToken)
+
     expect(response.status).to.equal(404);
     expect(response.body).to.deep.equal({ error: "Event not found" });
   });
@@ -86,9 +146,9 @@ describe("Event test", () => {
       event_date: "25/01/1994",
       event_time: "20:00PM",
       capacity: 10,
-      userId: createdEvent.owner_id,
     };
-    const event = await eventsController.create(eventData);
+    const idFirstUser = createdEvent.owner_id
+    const event = await eventsController.create(eventData, idFirstUser);
     const eventId = event.id;
 
     const user2 = await usersController.createUser({
@@ -97,12 +157,16 @@ describe("Event test", () => {
       email: "emma2@gmail.com",
       password: "dilan123",
     });
-    const userId = user2.id
+    const idSecondUser = user2.user.id
+    const accessToken2 = user2.token
 
-    await eventsController.joinEvent(eventId, userId, false)
+    await eventsController.joinEvent(eventId, idSecondUser, false)
 
-    const dataToRequest = { userId, eventId }
-    const response = await request(app).delete("/events/leave").send(dataToRequest)
+    const response = await request(app)
+    .delete("/events/leave")
+    .send({ eventId })
+    .set("authorization", accessToken2)
+
     expect(response.status).to.equal(200);
     expect(response.body).to.deep.equal({
       success: true,
@@ -110,20 +174,26 @@ describe("Event test", () => {
   }) 
 
   it("DELETE /events/leave Should return 404 and error if body.eventId param is empty", async () => {
-    const userId = createdEvent.owner_id;
-    const dataToRequest = { userId }
-    const response = await request(app).delete("/events/leave").send(dataToRequest)
+    const response = await request(app)
+    .delete("/events/leave")
+    .send()
+    .set("authorization", accessToken)
+
     expect(response.status).to.equal(400);
     expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Event Id"));
   })
 
-  it("DELETE /events/leave Should return 404 and error if body.userId param is empty", async () => {
+  it("DELETE /events/leave Should return 404 and error if userId param is empty", async () => {
     const eventId = createdEvent.id;
     const dataToRequest = { eventId }
-    const response = await request(app).delete("/events/leave").send(dataToRequest)
-    expect(response.status).to.equal(400);
-    expect(response.body).to.deep.equal(mockedErrorParamsEmpty("User Id"));
-  })
+
+    const response = await request(app)
+    .delete("/events/leave")
+    .send(dataToRequest)
+
+    expect(response.status).to.equal(403);
+    expect(response.body).to.deep.equal({ error: 'User Id is required' });
+  }) 
 
   it("DELETE /events/leave Should return 404 and error if the user aren't join to event", async () => {
     const user2 = await usersController.createUser({
@@ -132,11 +202,15 @@ describe("Event test", () => {
       email: "emma3@gmail.com",
       password: "dilan123",
     });
-
-    const userId = user2.id
+   
+    const userToken = user2.token
     const eventId = createdEvent.id;
-    const dataToRequest = { userId, eventId }
-    const response = await request(app).delete("/events/leave").send(dataToRequest)
+    
+    const response = await request(app)
+    .delete("/events/leave")
+    .send({ eventId })
+    .set("authorization", userToken)
+
     expect(response.status).to.equal(404);
     expect(response.body).to.deep.equal({error: "You aren't join to event"});
   }) 
@@ -148,7 +222,8 @@ describe("Event test", () => {
       email: "emma24@gmail.com",
       password: "dilan123",
     });
-    const userId = user2.id
+    const userId = user2.user.id
+    const userToken = user2.token
 
     const eventData = {
       title: "Python",
@@ -156,13 +231,15 @@ describe("Event test", () => {
       event_date: "25/01/1994",
       event_time: "20:00PM",
       capacity: 10,
-      userId: userId,
     };
-    const event = await eventsController.create(eventData);
+    const event = await eventsController.create(eventData, userId);
     const eventId = event.id;
 
-    const dataToRequest = { userId, eventId }
-    const response = await request(app).delete("/events/leave").send(dataToRequest)
+    const response = await request(app)
+    .delete("/events/leave")
+    .send({ eventId })
+    .set("authorization", userToken)
+
     expect(response.status).to.equal(404);
     expect(response.body).to.deep.equal({error: "You are the owner of this event"});
   })

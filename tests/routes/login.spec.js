@@ -24,48 +24,62 @@ describe("login tests", () => {
     await userController.deleteAllUsers();
   });
 
-  it("Should return 200 and find an user ", async () => {
+  it("POST /auth/login Should return 200, find an user and create an accessToken", async () => {
     const userParams = {
       email: "char@gmail.com",
       password: "dilan1",
     };
 
-    const response = await request(app).post("/auth/login").send(userParams);
+    const response = await request(app)
+    .post("/auth/login")
+    .send(userParams);
+
+    const user = response.body.userFound
     expect(response.status).to.equal(200);
-    expect(response.body).to.have.property("email", userParams.email);
-    expect(response.body).to.have.property("firstName");
-    expect(response.body).to.have.property("lastName");
+    expect(user).to.have.property("email", userParams.email);
+    expect(user).to.have.property("firstName");
+    expect(user).to.have.property("lastName");
+    expect(response.body).to.have.property("accessToken");
   });
 
-  it("Should return 401 and error if insert an email or password invalid ", async () => {
+  it("POST /auth/login Should return 401 and error if insert an email or password invalid ", async () => {
     const userParams = {
       email: "char@gmail.com",
       password: "dilan123",
     };
 
-    const response = await request(app).post("/auth/login").send(userParams);
+    const response = await request(app)
+    .post("/auth/login")
+    .send(userParams);
+
     expect(response.status).to.equal(401);
     expect(response.body).to.deep.equal({
       error: "Invalid email or password",
     });
   });
 
-  it("Should return an error if body.email is empty ", async () => {
+  it("POST /auth/login Should return an error if body.email is empty ", async () => {
     const userParams = {
       password: "dilan1",
     };
 
-    const response = await request(app).post("/auth/login").send(userParams);
+    const response = await request(app)
+    .post("/auth/login")
+    .send(userParams);
+
     expect(response.status).to.equal(400);
     expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Email"));
   });
 
-  it("Should return an error if body.password is empty ", async () => {
+  it("POST /auth/login Should return an error if body.password is empty ", async () => {
     const userParams = {
       email: "char@gmail.com",
     };
 
-    const response = await request(app).post("/auth/login").send(userParams);
+    const response = await request(app)
+    .post("/auth/login")
+    .send(userParams);
+    
     expect(response.status).to.equal(400);
     expect(response.body).to.deep.equal(mockedErrorParamsEmpty("Password"));
   });

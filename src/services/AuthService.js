@@ -1,9 +1,9 @@
 const jwt = require("jsonwebtoken")
 
-const generateAccessToken = async (idUser) => {  
+const generateAccessToken = async (idUser, expirationTimeToken = "1h") => {  
   try {
     const userId = { idUser }
-    const tokenAuthentication = await jwt.sign(userId, process.env.SECRET, {expiresIn: "1h"})
+    const tokenAuthentication = await jwt.sign(userId, process.env.SECRET, { expiresIn: expirationTimeToken })
     return tokenAuthentication
   } catch (error) {
     const errorObj = new Error(error.message);

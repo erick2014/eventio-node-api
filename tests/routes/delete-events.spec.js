@@ -5,6 +5,8 @@ const EventsController = require("../../src/controllers/eventController.js");
 const eventsController = new EventsController();
 const UsersController = require("../../src/controllers/usersController.js");
 const usersController = new UsersController();
+const { generateAccessToken } = require("../../src/services/AuthService.js")
+
 const {
   mockedErrorParamsEmpty,
 } = require("../mocks/event.mock.js");
@@ -14,6 +16,7 @@ describe("Event test", () => {
   let accessToken;
 
   before(async () => {
+
     const newUser = await usersController.createUser({
       firstName: "Dilan",
       lastName: "Toloza",
@@ -54,18 +57,22 @@ describe("Event test", () => {
 
   it("DELETE / Should return 403 and error if token expired", async () => {
     const eventId = createdEvent.id;
+    const idUser = createdEvent.owner_id
+    const token = await generateAccessToken(idUser, "1s")
 
-    const response = await request(app)
+    setTimeout( async () => {
+      const response = await request(app)
       .delete(`/events/${eventId}`)
-      .set("authorization", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZFVzZXIiOjEsImlhdCI6MTY5OTg4NzU2NywiZXhwIjoxNjk5ODkxMTY3fQ.Zoo2oPgg68ynk9qvqTZGF0OTNbAGENmzkRD-xcvp9uc")
+      .set("authorization", token)
 
-    expect(response.status).to.equal(403);
-    expect(response.body).to.deep.equal({
-      error: 'jwt expired'
-    });
+      expect(response.status).to.equal(403);
+      expect(response.body).to.deep.equal({
+        error: 'jwt expired'
+      });
+    }, 1000);
   });
 
-  it("DELETE / Should return 403 and error if token is malform", async () => {
+  it("DELETE / Should return 403 and error if token is malformed", async () => {
     const eventId = createdEvent.id;
 
     const response = await request(app)
